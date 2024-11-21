@@ -5,7 +5,7 @@
 
 -olib/${hb_plat}/${hb_comp}/${hb_name}
 
--w3 -es2 -gc3
+-g -w3 -es2 -gc3 -debug
 
 -cflag=-DHBMK_HAS_SDL2
 
