@@ -1,0 +1,7 @@
+# hbnk
+*.bak
+*.exe
+*.hbx
+build
+lib
+tmp
