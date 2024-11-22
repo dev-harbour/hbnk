@@ -1,0 +1,13 @@
+description=Harbour Nuklear SDL2 renderer backend
+
+incpaths=include
+headers=include/sdl2/${hb_name}.ch
+
+libpaths=lib/${hb_plat}/${hb_comp}
+
+libs=${_HB_DYNPREF}${hb_name}${_HB_DYNSUFF}
+
+{win}libs=mingw32 SDL2
+{linux}libs=SDL2
+{darwin}libs=SDL2
+
