@@ -6,3 +6,7 @@ It provides a lightweight, immediate-mode GUI toolkit, enabling Harbour develope
 ### Getting Started
 
 Installing hbnk requires Nuklear including its headers. For more info see [getting started](docs/README.md).
+
+### Example
+
+![sdl_drawFont](docs/assets/img/hbnk.png)
