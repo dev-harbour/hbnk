@@ -201,6 +201,7 @@ void hb_sdl_event_Return( SDL_Event *pSDL_Event )
 void hb_sdl_event_Return( SDL_Event *pSDL_Event ) __attribute__( ( unused ) );
 
 /* -------------------------------------------------------------------------
+Garbage Collector for nk_sdl_shutdown
 ------------------------------------------------------------------------- */
 static HB_GARBAGE_FUNC( hb_nuklear_sdl_renderer_Destructor )
 {
@@ -424,7 +425,7 @@ HB_FUNC( SDL_RENDERPRESENT )
 
 
 /* -------------------------------------------------------------------------
-nuklear_sdl_renderer.h
+API nuklear_sdl_renderer.h
 ------------------------------------------------------------------------- */
 //struct nk_context *nk_sdl_init( SDL_Window *win, SDL_Renderer *renderer );
 
@@ -441,6 +442,27 @@ HB_FUNC( NK_SDL_INIT )
    {
       HB_ERR_ARGS();
    }
+}
+
+// void nk_sdl_font_stash_begin( struct nk_font_atlas **atlas );
+HB_FUNC( NK_SDL_FONT_STASH_BEGIN )
+{
+   if( hb_param( 1, HB_IT_NIL ) == NULL )
+   {
+      struct nk_font_atlas *atlas;
+      nk_sdl_font_stash_begin( &atlas );
+   }
+   else
+   {
+      HB_ERR_ARGS();
+   }
+}
+
+
+// void nk_sdl_font_stash_end( void );
+HB_FUNC( NK_SDL_FONT_STASH_END )
+{
+   nk_sdl_font_stash_end();
 }
 
 // int nk_sdl_handle_event( SDL_Event *event );
@@ -477,23 +499,9 @@ HB_FUNC( NK_SDL_SHUTDOWN )
    nk_sdl_shutdown();
 }
 
-// void nk_sdl_font_stash_end( void );
-HB_FUNC( NK_SDL_FONT_STASH_END )
+// void nk_sdl_handle_grab( void );
+HB_FUNC( NK_SDL_HANDLE_GRAB )
 {
-   nk_sdl_font_stash_end();
-}
-
-// void nk_sdl_font_stash_begin( struct nk_font_atlas **atlas );
-HB_FUNC( NK_SDL_FONT_STASH_BEGIN )
-{
-   if( hb_param( 1, HB_IT_NIL ) == NULL )
-   {
-      struct nk_font_atlas *atlas;
-      nk_sdl_font_stash_begin( &atlas );
-   }
-   else
-   {
-      HB_ERR_ARGS();
-   }
+   nk_sdl_handle_grab();
 }
 
