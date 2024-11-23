@@ -12,9 +12,9 @@ PROCEDURE Main()
    LOCAL nWindowFlags
    LOCAL nRendererFlags
    LOCAL nFlags
-   LOCAL render_w, render_h
-   LOCAL window_w, window_h
-   LOCAL scale_x, scale_y
+   LOCAL renderWidth, renderHeight
+   LOCAL windowWidth, windowHeight
+   LOCAL nScaleX, nScaleY
 
    SDL_SetHint( SDL_HINT_VIDEO_HIGHDPI_DISABLED, "0" )
    SDL_Init( SDL_INIT_VIDEO )
@@ -40,11 +40,11 @@ PROCEDURE Main()
    DO WHILE( !nRunning )
 
       /* scale the pRenderer output for High-DPI displays */
-      SDL_GetRendererOutputSize( pRenderer, @render_w, @render_h )
-      SDL_GetWindowSize( pWin, @window_w, @window_h )
-      scale_x := render_w / window_w
-      scale_y := render_h / window_h
-      SDL_RenderSetScale( pRenderer, scale_x, scale_y )
+      SDL_GetRendererOutputSize( pRenderer, @renderWidth, @renderHeight )
+      SDL_GetWindowSize( pWin, @windowWidth, @windowHeight )
+      nScaleX := renderWidth / windowWidth
+      nScaleY := renderHeight / windowHeight
+      SDL_RenderSetScale( pRenderer, nScaleX, nScaleY )
 
       nk_input_begin( pContext )
       DO WHILE( SDL_PollEvent( @pEvent ) )
@@ -55,6 +55,7 @@ PROCEDURE Main()
 
          nk_sdl_handle_event( @pEvent )
       ENDDO
+      nk_sdl_handle_grab() /* optional grabbing behavior */
       nk_input_end( pContext )
 
       /* GUI */
