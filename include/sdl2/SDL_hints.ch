@@ -1,7 +1,0 @@
-
-#ifndef SDL_HINTS_CH_
-#define SDL_HINTS_CH_
-
-#define SDL_HINT_VIDEO_HIGHDPI_DISABLED "SDL_VIDEO_HIGHDPI_DISABLED"
-
-#endif /* End SDL_HINTS_CH_ */
