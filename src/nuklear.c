@@ -170,8 +170,10 @@ HB_FUNC( NK_CLEAR )
    }
 }
 
+// ---
 // void nk_free(struct nk_context*);
-
+// Implementation in Harbour function HB_GARBAGE_FUNC( hb_nk_context_Destructor )
+// ---
 // void nk_set_user_data(struct nk_context*, nk_handle handle);
 
 // void nk_input_begin( struct nk_context *);
@@ -1115,3 +1117,7 @@ HB_FUNC( NK_RECT )
 // struct nk_style_item nk_style_item_image(struct nk_image img);
 // struct nk_style_item nk_style_item_nine_slice(struct nk_nine_slice slice);
 // struct nk_style_item nk_style_item_hide(void);
+
+/* -------------------------------------------------------------------------
+HARBOUR IMPLEMENTATION
+------------------------------------------------------------------------- */
