@@ -13,14 +13,60 @@
 #define NK_INCLUDE_VERTEX_BUFFER_OUTPUT
 #define NK_INCLUDE_STANDARD_VARARGS
 #define NK_BUTTON_TRIGGER_ON_RELEASE
+#define NK_INCLUDE_STANDARD_IO
 
+/* -------------------------------------------------------------------------
+NK_SDL_RENDERER_IMPLEMENTATION
+------------------------------------------------------------------------- */
 #if defined( HBMK_HAS_SDL2 )
    #define NK_SDL_RENDERER_IMPLEMENTATION
    #include "hb_nuklear_sdl_renderer.h"
+
+HB_FUNC( HBNK_LOADFONTS )
+{
+   if( hb_param( 1, HB_IT_POINTER ) != NULL && hb_param( 3, HB_IT_NUMERIC ) != NULL )
+   {
+      struct nk_context *ctx = hb_nk_context_Param( 1 );
+      const char *file_path = hb_parc( 2 );
+      float height = ( float ) hb_parnd( 3 );
+
+      struct nk_font_atlas *atlas = NULL;
+      struct nk_font_config config = nk_font_config( 0 );
+      struct nk_font *font = NULL;
+
+      nk_sdl_font_stash_begin( &atlas );
+
+      if( hb_param( 2, HB_IT_NIL ) != NULL || !hb_param( 2, HB_IT_STRING ) )
+      {
+         font = nk_font_atlas_add_default( atlas, height, &config );
+      }
+      else
+      {
+         font = nk_font_atlas_add_from_file( atlas, file_path, height, &config );
+      }
+
+      nk_sdl_font_stash_end();
+
+      if( font )
+      {
+         font->handle.height /= 1.0f;
+         nk_style_set_font( ctx, &font->handle );
+         hb_retl( T );
+      }
+      else
+      {
+         hb_retl( F );
+      }
+   }
+   else
+   {
+      HB_ERR_ARGS();
+   }
+}
 #endif
 
 /* -------------------------------------------------------------------------
-Garbage Collector Nuklear
+Garbage Collector Nuklear context
 ------------------------------------------------------------------------- */
 static HB_GARBAGE_FUNC( hb_nk_context_Destructor )
 {
@@ -704,7 +750,10 @@ HB_FUNC( NK_COMBO_END )
 // void nk_style_load_cursor(struct nk_context*, enum nk_style_cursor, const struct nk_cursor*);
 // void nk_style_load_all_cursors(struct nk_context*, struct nk_cursor*);
 // const char* nk_style_get_color_by_name(enum nk_style_colors);
-// void nk_style_set_font(struct nk_context*, const struct nk_user_font*);
+// ---
+// void nk_style_set_font( struct nk_context*, const struct nk_user_font * );
+// Implementation in Harbour function hbnk_LoadFonts
+// ---
 // nk_bool nk_style_set_cursor(struct nk_context*, enum nk_style_cursor);
 // void nk_style_show_cursor(struct nk_context*);
 // void nk_style_hide_cursor(struct nk_context*);
@@ -917,11 +966,20 @@ HB_FUNC( NK_RECT )
 // void nk_font_atlas_init(struct nk_font_atlas*, struct nk_allocator*);
 // void nk_font_atlas_init_custom(struct nk_font_atlas*, struct nk_allocator *persistent, struct nk_allocator *transient);
 // void nk_font_atlas_begin(struct nk_font_atlas*);
+// ---
 // struct nk_font_config nk_font_config(float pixel_height);
+// Implementation in Harbour function hbnk_LoadFonts
+// ---
 // struct nk_font *nk_font_atlas_add(struct nk_font_atlas*, const struct nk_font_config*);
+// ---
 // struct nk_font* nk_font_atlas_add_default(struct nk_font_atlas*, float height, const struct nk_font_config*);
+// Implementation in Harbour function hbnk_LoadFonts
+// ---
 // struct nk_font* nk_font_atlas_add_from_memory(struct nk_font_atlas *atlas, void *memory, nk_size size, float height, const struct nk_font_config *config);
+// ---
 // struct nk_font* nk_font_atlas_add_from_file(struct nk_font_atlas *atlas, const char *file_path, float height, const struct nk_font_config*);
+// Implementation in Harbour function hbnk_LoadFonts
+// ---
 // struct nk_font *nk_font_atlas_add_compressed(struct nk_font_atlas*, void *memory, nk_size size, float height, const struct nk_font_config*);
 // struct nk_font* nk_font_atlas_add_compressed_base85(struct nk_font_atlas*, const char *data, float height, const struct nk_font_config *config);
 // const void* nk_font_atlas_bake(struct nk_font_atlas*, int *width, int *height, enum nk_font_atlas_format);

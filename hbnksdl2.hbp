@@ -9,12 +9,12 @@
 
 -cflag=-DHBMK_HAS_SDL2
 
--iinclude/sdl2/
+-iinclude/${hb_name}
 
--hbx=include/sdl2/${hb_name}.hbx
+-hbx=include/${hb_name}/${hb_name}.hbx
 
 src/*.c
-src/sdl2/*.c
+src/hbnksdl2/*.c
 
 $hb_pkg_dynlib.hbm
 $hb_pkg_install.hbm

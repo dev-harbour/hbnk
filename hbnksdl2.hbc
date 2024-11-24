@@ -1,7 +1,7 @@
 description=Harbour Nuklear SDL2 renderer backend
 
 incpaths=include
-headers=include/sdl2/${hb_name}.ch
+headers=include/${hb_name}/${hb_name}.ch
 
 libpaths=lib/${hb_plat}/${hb_comp}
 
