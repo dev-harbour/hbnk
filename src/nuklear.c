@@ -16,11 +16,13 @@
 #define NK_INCLUDE_STANDARD_IO
 
 /* -------------------------------------------------------------------------
-NK_SDL_RENDERER_IMPLEMENTATION
+HARBOUR IMPLEMENTATION
 ------------------------------------------------------------------------- */
 #if defined( HBMK_HAS_SDL2 )
    #define NK_SDL_RENDERER_IMPLEMENTATION
    #include "hb_nuklear_sdl_renderer.h"
+
+static const nk_rune *hbnk_set_codepage( const char *codepage );
 
 HB_FUNC( HBNK_LOADFONTS )
 {
@@ -29,10 +31,20 @@ HB_FUNC( HBNK_LOADFONTS )
       struct nk_context *ctx = hb_nk_context_Param( 1 );
       const char *file_path = hb_parc( 2 );
       float height = ( float ) hb_parnd( 3 );
+      const char *codepage = hb_parc( 4 );
 
       struct nk_font_atlas *atlas = NULL;
       struct nk_font_config config = nk_font_config( 0 );
       struct nk_font *font = NULL;
+
+      const nk_rune *glyph_ranges = hbnk_set_codepage( codepage );
+      if( !glyph_ranges )
+      {
+         printf("Error: Invalid codepage.\n");
+         hb_retl( F );
+         return;
+      }
+      config.range = glyph_ranges;
 
       nk_sdl_font_stash_begin( &atlas );
 
@@ -64,6 +76,51 @@ HB_FUNC( HBNK_LOADFONTS )
    }
 }
 #endif
+
+static const nk_rune *hbnk_set_codepage( const char *codepage )
+{
+   if( !codepage )
+   {
+      printf( "Error: No codepage specified.\n" );
+      return NULL;
+   }
+
+   /* TODO */
+   static const nk_rune cp852_ranges[] = {
+      0x0020, 0x007F, // ASCII
+      0x0080, 0x00FF, // Latin-1 Supplement
+      0x0100, 0x017F, // Latin-Extended-A
+      0
+   };
+   
+   /* TODO */
+   static const nk_rune utf8ex_ranges[] =
+   {
+      0x0020, 0x007F, // ASCII
+      0x0100, 0x017F, // Latin-Extended-A
+      0x0180, 0x024F, // Latin-Extended-B
+      0
+   };
+
+   const nk_rune *glyph_ranges = NULL;
+
+    // Wybór kodowania na podstawie nazwy
+   if( strcmp( codepage, "CP852" ) == 0 )
+   {
+      glyph_ranges = cp852_ranges;
+   }
+   else if( strcmp( codepage, "UTF8EX" ) == 0 )
+   {
+      glyph_ranges = utf8ex_ranges;
+   }
+   else
+   {
+      printf("Unsupported codepage: %s\n", codepage);
+     return NULL;
+   }
+
+   return glyph_ranges;
+}
 
 /* -------------------------------------------------------------------------
 Garbage Collector Nuklear context
@@ -1117,7 +1174,3 @@ HB_FUNC( NK_RECT )
 // struct nk_style_item nk_style_item_image(struct nk_image img);
 // struct nk_style_item nk_style_item_nine_slice(struct nk_nine_slice slice);
 // struct nk_style_item nk_style_item_hide(void);
-
-/* -------------------------------------------------------------------------
-HARBOUR IMPLEMENTATION
-------------------------------------------------------------------------- */
