@@ -35,8 +35,11 @@ PROCEDURE Main()
 
    pContext := nk_sdl_init( pWin, pRenderer )
 
+   hb_cdpSelect( "UTF8EX" )
+   hb_SetTermCP( hb_cdpTerm() )
+
    /* NIL select default font or provide path to font */
-   hbnk_LoadFonts( pContext, NIL, 13 )
+   hbnk_LoadFonts( pContext, "9x18.ttf", 18, "CP852" )
 
    DO WHILE( !lQuit )
 
@@ -53,6 +56,10 @@ PROCEDURE Main()
 
       /* GUI */
       nFlags := hb_BitOr( NK_WINDOW_BORDER, NK_WINDOW_MOVABLE, NK_WINDOW_SCALABLE, NK_WINDOW_MINIMIZABLE, NK_WINDOW_TITLE )
+      IF( nk_begin( pContext, "ĄĆĘŁŃÓŚŹŻ", { 50, 50, 230, 250 }, nFlags ) )
+      ENDIF
+      nk_end( pContext )
+
       IF( nk_begin( pContext, "Hello Harbour Nuklear!", { 50, 50, 230, 250 }, nFlags ) )
       ENDIF
       nk_end( pContext )
