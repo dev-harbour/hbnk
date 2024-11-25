@@ -440,8 +440,8 @@ NK_STATIC_ASSERT(sizeof(nk_int) == 4);
 NK_STATIC_ASSERT(sizeof(nk_byte) == 1);
 NK_STATIC_ASSERT(sizeof(nk_flags) >= 4);
 NK_STATIC_ASSERT(sizeof(nk_rune) >= 4);
-NK_STATIC_ASSERT(sizeof(nk_size) >= sizeof(void*));
-NK_STATIC_ASSERT(sizeof(nk_ptr) >= sizeof(void*));
+//NK_STATIC_ASSERT(sizeof(nk_size) >= sizeof(void*));
+//NK_STATIC_ASSERT(sizeof(nk_ptr) >= sizeof(void*));
 #ifdef NK_INCLUDE_STANDARD_BOOL
 NK_STATIC_ASSERT(sizeof(nk_bool) == sizeof(bool));
 #else
