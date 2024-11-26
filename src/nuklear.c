@@ -467,8 +467,7 @@ HB_FUNC( NK_WIDGET_WIDTH )
 {
    if( hb_param( 1, HB_IT_POINTER ) != NULL )
    {
-      struct nk_context *ctx = hb_nk_context_Param( 1 );
-      hb_retnd( ( float ) nk_widget_width( ctx ) );
+      hb_retnd( ( float ) nk_widget_width( hb_nk_context_Param( 1 ) ) );
    }
    else
    {
@@ -491,8 +490,7 @@ HB_FUNC( NK_LABEL )
 {
    if( hb_param( 1, HB_IT_POINTER ) != NULL && hb_param( 2, HB_IT_STRING ) != NULL && hb_param( 3, HB_IT_NUMERIC ) != NULL )
    {
-      struct nk_context *ctx = hb_nk_context_Param( 1 );
-      nk_label( ctx, hb_parc( 2 ), hb_parni( 3 ) );
+      nk_label( hb_nk_context_Param( 1 ), hb_parc( 2 ), hb_parni( 3 ) );
    }
    else
    {
@@ -527,8 +525,7 @@ HB_FUNC( NK_BUTTON_LABEL )
 {
    if( hb_param( 1, HB_IT_POINTER ) != NULL && hb_param( 2, HB_IT_STRING ) != NULL )
    {
-      struct nk_context *ctx = hb_nk_context_Param( 1 );
-      hb_retl( nk_button_label( ctx, hb_parc( 2 ) ) );
+      hb_retl( nk_button_label( hb_nk_context_Param( 1 ), hb_parc( 2 ) ) );
    }
    else
    {
@@ -570,8 +567,7 @@ HB_FUNC( NK_OPTION_LABEL )
 {
    if( hb_param( 1, HB_IT_POINTER ) != NULL && hb_param( 2, HB_IT_STRING ) != NULL && hb_param( 3, HB_IT_LOGICAL ) != NULL )
    {
-      struct nk_context *ctx = hb_nk_context_Param( 1 );
-      hb_retl( nk_option_label( ctx, hb_parc( 2 ), hb_parl( 3 ) ) );
+      hb_retl( nk_option_label( hb_nk_context_Param( 1 ), hb_parc( 2 ), hb_parl( 3 ) ) );
    }
    else
    {
