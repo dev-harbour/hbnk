@@ -575,7 +575,19 @@ HB_FUNC( NK_OPTION_LABEL )
    }
 }
 
-// nk_bool nk_option_text(struct nk_context*, const char*, int, nk_bool active);
+// nk_bool nk_option_text( struct nk_context *, const char *, int, nk_bool active );
+HB_FUNC( NK_OPTION_TEXT )
+{
+   if( hb_param( 1, HB_IT_POINTER ) != NULL && hb_param( 2, HB_IT_STRING ) != NULL && hb_param( 3, HB_IT_LOGICAL ) != NULL )
+   {
+      hb_retl( nk_option_text( hb_nk_context_Param( 1 ), hb_parc( 2 ), hb_parni( 3 ), hb_parl( 4 ) ) );
+   }
+   else
+   {
+      HB_ERR_ARGS();
+   }
+}
+
 // nk_bool nk_selectable_label(struct nk_context*, const char*, nk_flags align, nk_bool *value);
 // nk_bool nk_selectable_text(struct nk_context*, const char*, int, nk_flags align, nk_bool *value);
 // nk_bool nk_selectable_image_label(struct nk_context*,struct nk_image,  const char*, nk_flags align, nk_bool *value);
@@ -598,7 +610,6 @@ HB_FUNC( NK_OPTION_LABEL )
 // struct nk_colorf nk_color_picker(struct nk_context*, struct nk_colorf, enum nk_color_format);
 HB_FUNC( NK_COLOR_PICKER )
 {
-   struct nk_context *ctx = hb_nk_context_Param( 1 );
    PHB_ITEM pArrayPar;
 
    if( hb_param( 1, HB_IT_POINTER ) != NULL && ( pArrayPar = hb_param( 2, HB_IT_ARRAY ) ) != NULL && hb_param( 3, HB_IT_NUMERIC ) != NULL )
@@ -609,7 +620,7 @@ HB_FUNC( NK_COLOR_PICKER )
       colorPar.b = ( float ) hb_arrayGetND( pArrayPar, 3 );
       colorPar.a = ( float ) hb_arrayGetND( pArrayPar, 4 );
 
-      struct nk_colorf colorRet = nk_color_picker( ctx, colorPar, hb_parni( 3 ) );
+      struct nk_colorf colorRet = nk_color_picker( hb_nk_context_Param( 1 ), colorPar, hb_parni( 3 ) );
 
       PHB_ITEM pArrayRet = hb_itemArrayNew( 4 );
 
@@ -633,9 +644,8 @@ HB_FUNC( NK_PROPERTY_INT )
    if( hb_param( 1, HB_IT_POINTER ) != NULL && hb_param( 2, HB_IT_STRING ) != NULL && hb_param( 3, HB_IT_NUMERIC ) != NULL && hb_param( 4, HB_IT_BYREF ) != NULL &&
               hb_param( 5, HB_IT_NUMERIC ) != NULL && hb_param( 6, HB_IT_NUMERIC ) != NULL && hb_param( 7, HB_IT_NUMERIC ) != NULL )
    {
-      struct nk_context *ctx = hb_nk_context_Param( 1 );
       int val = 0;
-      nk_property_int( ctx, hb_parc( 2 ), hb_parni( 3 ), &val, hb_parni( 5 ), hb_parni( 6 ), ( float ) hb_parnd( 7 ) );
+      nk_property_int( hb_nk_context_Param( 1 ), hb_parc( 2 ), hb_parni( 3 ), &val, hb_parni( 5 ), hb_parni( 6 ), ( float ) hb_parnd( 7 ) );
       hb_storni( val, 4 );
    }
    else
@@ -654,8 +664,7 @@ HB_FUNC( NK_PROPERTYF )
    if( hb_param( 1, HB_IT_POINTER ) != NULL && hb_param( 2, HB_IT_STRING ) != NULL && hb_param( 3, HB_IT_NUMERIC ) != NULL && hb_param( 4, HB_IT_NUMERIC ) != NULL &&
       hb_param( 5, HB_IT_NUMERIC ) != NULL && hb_param( 6, HB_IT_NUMERIC ) != NULL && hb_param( 7, HB_IT_NUMERIC ) != NULL )
    {
-      struct nk_context *ctx = hb_nk_context_Param( 1 );
-      hb_retnd( ( float ) nk_propertyf( ctx, hb_parc( 2 ), ( float ) hb_parnd( 3 ), ( float ) hb_parnd( 4 ), ( float ) hb_parnd( 5 ), ( float ) hb_parnd( 6 ), ( float ) hb_parnd( 7 ) ) );
+      hb_retnd( ( float ) nk_propertyf( hb_nk_context_Param( 1 ), hb_parc( 2 ), ( float ) hb_parnd( 3 ), ( float ) hb_parnd( 4 ), ( float ) hb_parnd( 5 ), ( float ) hb_parnd( 6 ), ( float ) hb_parnd( 7 ) ) );
    }
    else
    {
@@ -702,7 +711,6 @@ HB_FUNC( NK_COMBO_BEGIN_COLOR )
 
    if( hb_param( 1, HB_IT_POINTER ) != NULL && ( pArray1 = hb_param( 2, HB_IT_ARRAY ) ) != NULL && ( pArray2 = hb_param( 3, HB_IT_ARRAY ) ) != NULL )
    {
-      struct nk_context *ctx = hb_nk_context_Param( 1 );
       struct nk_color color;
       color.r = ( unsigned char ) hb_arrayGetNI( pArray1, 1 );
       color.g = ( unsigned char ) hb_arrayGetNI( pArray1, 2 );
@@ -713,7 +721,7 @@ HB_FUNC( NK_COMBO_BEGIN_COLOR )
       size.x = ( float ) hb_arrayGetND( pArray2, 1 );
       size.y = ( float ) hb_arrayGetND( pArray2, 2 );
 
-      hb_retl( nk_combo_begin_color( ctx, color, size ) );
+      hb_retl( nk_combo_begin_color( hb_nk_context_Param( 1 ), color, size ) );
    }
    else
    {
@@ -740,8 +748,7 @@ HB_FUNC( NK_COMBO_END )
 {
    if( hb_param( 1, HB_IT_POINTER ) != NULL )
    {
-      struct nk_context *ctx = hb_nk_context_Param( 1 );
-      nk_combo_end( ctx );
+      nk_combo_end( hb_nk_context_Param( 1 ) );
    }
    else
    {
@@ -996,7 +1003,7 @@ HB_FUNC( NK_RGB_CF )
 // nk_hash nk_murmur_hash(const void *key, int len, nk_hash seed);
 // void nk_triangle_from_direction(struct nk_vec2 *result, struct nk_rect r, float pad_x, float pad_y, enum nk_heading);
 
-// struct nk_vec2 nk_vec2(float x, float y);
+// struct nk_vec2 nk_vec2( float x, float y );
 HB_FUNC( NK_VEC2 )
 {
    if( hb_param( 1, HB_IT_NUMERIC ) != NULL && hb_param( 2, HB_IT_NUMERIC ) != NULL )
@@ -1021,7 +1028,7 @@ HB_FUNC( NK_VEC2 )
 // struct nk_vec2 nk_vec2iv(const int *xy);
 // struct nk_rect nk_get_null_rect(void);
 
-// struct nk_rect nk_rect(float x, float y, float w, float h);
+// struct nk_rect nk_rect( float x, float y, float w, float h );
 HB_FUNC( NK_RECT )
 {
    if( hb_param( 1, HB_IT_NUMERIC ) != NULL &&
