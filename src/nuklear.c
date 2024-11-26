@@ -518,6 +518,10 @@ HB_FUNC( NK_LABEL )
 // void nk_value_color_byte(struct nk_context*, const char *prefix, struct nk_color);
 // void nk_value_color_float(struct nk_context*, const char *prefix, struct nk_color);
 // void nk_value_color_hex(struct nk_context*, const char *prefix, struct nk_color);
+
+/* -------------------------------------------------------------------------
+BUTTON
+------------------------------------------------------------------------- */
 // nk_bool nk_button_text(struct nk_context*, const char *title, int len);
 
 // nk_bool nk_button_label(struct nk_context*, const char *title);
@@ -551,6 +555,7 @@ HB_FUNC( NK_BUTTON_LABEL )
 // void nk_button_set_behavior(struct nk_context*, enum nk_button_behavior);
 // nk_bool nk_button_push_behavior(struct nk_context*, enum nk_button_behavior);
 // nk_bool nk_button_pop_behavior(struct nk_context*);
+
 // nk_bool nk_check_label(struct nk_context*, const char*, nk_bool active);
 // nk_bool nk_check_text(struct nk_context*, const char*, int, nk_bool active);
 // unsigned nk_check_flags_label(struct nk_context*, const char*, unsigned int flags, unsigned int value);
