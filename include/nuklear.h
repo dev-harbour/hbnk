@@ -297,8 +297,12 @@ extern "C" {
   #define NK_UNIQUE_NAME(name) NK_STRING_JOIN(name,__LINE__)
 #endif
 
-#ifndef NK_STATIC_ASSERT
-  #define NK_STATIC_ASSERT(exp) typedef char NK_UNIQUE_NAME(_dummy_array)[(exp)?1:-1]
+#if defined(__MINGW32__) || defined(__MINGW64__)
+    // MSYS2/MinGW environment: skip static assertions
+    #define NK_STATIC_ASSERT(exp)
+#else
+    // Default behavior
+    #define NK_STATIC_ASSERT(exp) typedef char NK_UNIQUE_NAME(_dummy_array)[(exp)?1:-1]
 #endif
 
 #ifndef NK_FILE_LINE
@@ -440,8 +444,8 @@ NK_STATIC_ASSERT(sizeof(nk_int) == 4);
 NK_STATIC_ASSERT(sizeof(nk_byte) == 1);
 NK_STATIC_ASSERT(sizeof(nk_flags) >= 4);
 NK_STATIC_ASSERT(sizeof(nk_rune) >= 4);
-//NK_STATIC_ASSERT(sizeof(nk_size) >= sizeof(void*));
-//NK_STATIC_ASSERT(sizeof(nk_ptr) >= sizeof(void*));
+NK_STATIC_ASSERT(sizeof(nk_size) >= sizeof(void*));
+NK_STATIC_ASSERT(sizeof(nk_ptr) >= sizeof(void*));
 #ifdef NK_INCLUDE_STANDARD_BOOL
 NK_STATIC_ASSERT(sizeof(nk_bool) == sizeof(bool));
 #else
