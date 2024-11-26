@@ -92,7 +92,7 @@ static const nk_rune *hbnk_set_codepage( const char *codepage )
       0x0100, 0x017F, // Latin-Extended-A
       0
    };
-   
+
    /* TODO */
    static const nk_rune utf8ex_ranges[] =
    {
@@ -410,10 +410,7 @@ HB_FUNC( NK_LAYOUT_ROW_DYNAMIC )
 {
    if( hb_param( 1, HB_IT_POINTER ) != NULL && hb_param( 2, HB_IT_NUMERIC ) != NULL && hb_param( 3, HB_IT_NUMERIC ) != NULL )
    {
-      struct nk_context *ctx = hb_nk_context_Param( 1 );
-      float height = ( float ) hb_parnd( 2 );
-      int cols = hb_parni( 3 );
-      nk_layout_row_dynamic( ctx, height, cols );
+      nk_layout_row_dynamic( hb_nk_context_Param( 1 ), ( float ) hb_parnd( 2 ), hb_parni( 3 ) );
    }
    else
    {
@@ -786,10 +783,55 @@ HB_FUNC( NK_COMBO_END )
 // void nk_tooltipfv(struct nk_context*, NK_PRINTF_FORMAT_STRING const char*, va_list) NK_PRINTF_VALIST_FUNC(2);
 // nk_bool nk_tooltip_begin(struct nk_context*, float width);
 // void nk_tooltip_end(struct nk_context*);
-// void nk_menubar_begin(struct nk_context*);
-// void nk_menubar_end(struct nk_context*);
+
+// void nk_menubar_begin( struct nk_context * );
+HB_FUNC( NK_MENUBAR_BEGIN )
+{
+   if( hb_param( 1, HB_IT_POINTER ) != NULL )
+   {
+      nk_menubar_begin( hb_nk_context_Param( 1 ) );
+   }
+   else
+   {
+      HB_ERR_ARGS();
+   }
+}
+
+// void nk_menubar_end( struct nk_context * );
+HB_FUNC( NK_MENUBAR_END )
+{
+   if( hb_param( 1, HB_IT_POINTER ) != NULL )
+   {
+      nk_menubar_end( hb_nk_context_Param( 1 ) );
+   }
+   else
+   {
+      HB_ERR_ARGS();
+   }
+}
+
 // nk_bool nk_menu_begin_text(struct nk_context*, const char* title, int title_len, nk_flags align, struct nk_vec2 size);
-// nk_bool nk_menu_begin_label(struct nk_context*, const char*, nk_flags align, struct nk_vec2 size);
+
+// nk_bool nk_menu_begin_label( struct nk_context *, const char *, nk_flags align, struct nk_vec2 size );
+HB_FUNC( NK_MENU_BEGIN_LABEL )
+{
+   PHB_ITEM pArray;
+
+   if( hb_param( 1, HB_IT_POINTER ) != NULL && hb_param( 2, HB_IT_STRING ) != NULL && hb_param( 3, HB_IT_NUMERIC ) != NULL &&
+      ( pArray = hb_param( 4, HB_IT_ARRAY ) ) != NULL && hb_arrayLen( pArray ) == 2 )
+   {
+      struct nk_vec2 size;
+      size.x = ( float ) hb_arrayGetND( pArray, 1 );
+      size.y = ( float ) hb_arrayGetND( pArray, 2 );
+
+      hb_retl( nk_menu_begin_label( hb_nk_context_Param( 1 ), hb_parc( 2 ), hb_parni( 3 ), size ) );
+   }
+   else
+   {
+      HB_ERR_ARGS();
+   }
+}
+
 // nk_bool nk_menu_begin_image(struct nk_context*, const char*, struct nk_image, struct nk_vec2 size);
 // nk_bool nk_menu_begin_image_text(struct nk_context*, const char*, int,nk_flags align,struct nk_image, struct nk_vec2 size);
 // nk_bool nk_menu_begin_image_label(struct nk_context*, const char*, nk_flags align,struct nk_image, struct nk_vec2 size);
@@ -797,13 +839,39 @@ HB_FUNC( NK_COMBO_END )
 // nk_bool nk_menu_begin_symbol_text(struct nk_context*, const char*, int,nk_flags align,enum nk_symbol_type, struct nk_vec2 size);
 // nk_bool nk_menu_begin_symbol_label(struct nk_context*, const char*, nk_flags align,enum nk_symbol_type, struct nk_vec2 size);
 // nk_bool nk_menu_item_text(struct nk_context*, const char*, int,nk_flags align);
-// nk_bool nk_menu_item_label(struct nk_context*, const char*, nk_flags alignment);
+
+// nk_bool nk_menu_item_label( struct nk_context *, const char *, nk_flags alignment );
+HB_FUNC( NK_MENU_ITEM_LABEL )
+{
+   if( hb_param( 1, HB_IT_POINTER ) != NULL && hb_param( 2, HB_IT_STRING ) != NULL && hb_param( 3, HB_IT_NUMERIC ) != NULL )
+   {
+      hb_retl( nk_menu_item_label( hb_nk_context_Param( 1 ), hb_parc( 2 ), hb_parni( 3 ) ) );
+   }
+   else
+   {
+      HB_ERR_ARGS();
+   }
+}
+
 // nk_bool nk_menu_item_image_label(struct nk_context*, struct nk_image, const char*, nk_flags alignment);
 // nk_bool nk_menu_item_image_text(struct nk_context*, struct nk_image, const char*, int len, nk_flags alignment);
 // nk_bool nk_menu_item_symbol_text(struct nk_context*, enum nk_symbol_type, const char*, int, nk_flags alignment);
 // nk_bool nk_menu_item_symbol_label(struct nk_context*, enum nk_symbol_type, const char*, nk_flags alignment);
 // void nk_menu_close(struct nk_context*);
-// void nk_menu_end(struct nk_context*);
+
+// void nk_menu_end( struct nk_context * );
+HB_FUNC( NK_MENU_END )
+{
+   if( hb_param( 1, HB_IT_POINTER ) != NULL )
+   {
+      nk_menu_end( hb_nk_context_Param( 1 ) );
+   }
+   else
+   {
+      HB_ERR_ARGS();
+   }
+}
+
 // void nk_style_default(struct nk_context*);
 // void nk_style_from_table(struct nk_context*, const struct nk_color*);
 // void nk_style_load_cursor(struct nk_context*, enum nk_style_cursor, const struct nk_cursor*);
