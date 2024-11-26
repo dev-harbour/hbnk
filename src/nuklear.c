@@ -123,6 +123,34 @@ static const nk_rune *hbnk_set_codepage( const char *codepage )
    return glyph_ranges;
 }
 
+//float hbnk_input_mouse_pos_x( struct nk_context *ctx )
+HB_FUNC( HBNK_INPUT_MOUSE_POS_X )
+{
+   if( hb_param( 1, HB_IT_POINTER ) != NULL )
+   {
+      struct nk_context *ctx = hb_nk_context_Param( 1 );
+      hb_retnd( ( float ) ctx->input.mouse.pos.x );
+   }
+   else
+   {
+      HB_ERR_ARGS();
+   }
+}
+
+//float hbnk_input_mouse_pos_y( struct nk_context *ctx )
+HB_FUNC( HBNK_INPUT_MOUSE_POS_Y )
+{
+   if( hb_param( 1, HB_IT_POINTER ) != NULL )
+   {
+      struct nk_context *ctx = hb_nk_context_Param( 1 );
+      hb_retnd( ( float ) ctx->input.mouse.pos.y );
+   }
+   else
+   {
+      HB_ERR_ARGS();
+   }
+}
+
 /* -------------------------------------------------------------------------
 Garbage Collector Nuklear context
 ------------------------------------------------------------------------- */
@@ -458,7 +486,30 @@ HB_FUNC( NK_LAYOUT_ROW_STATIC )
 // void nk_list_view_end(struct nk_list_view*);
 // enum nk_widget_layout_states nk_widget(struct nk_rect*, const struct nk_context*);
 // enum nk_widget_layout_states nk_widget_fitting(struct nk_rect*, struct nk_context*, struct nk_vec2);
-// struct nk_rect nk_widget_bounds(struct nk_context*);
+
+// struct nk_rect nk_widget_bounds( struct nk_context * );
+HB_FUNC( NK_WIDGET_BOUNDS )
+{
+   if( hb_param( 1, HB_IT_POINTER ) != NULL )
+   {
+      struct nk_rect rect = nk_widget_bounds( hb_nk_context_Param( 1 ) );
+
+      PHB_ITEM pArray = hb_itemArrayNew( 4 );
+
+      hb_arraySetND( pArray, 1, ( float ) rect.x );
+      hb_arraySetND( pArray, 2, ( float ) rect.y );
+      hb_arraySetND( pArray, 3, ( float ) rect.w );
+      hb_arraySetND( pArray, 4, ( float ) rect.h );
+
+      hb_itemReturnRelease( pArray );
+
+   }
+   else
+   {
+      HB_ERR_ARGS();
+   }
+}
+
 // struct nk_vec2 nk_widget_position(struct nk_context*);
 // struct nk_vec2 nk_widget_size(struct nk_context*);
 
@@ -1195,7 +1246,10 @@ HB_FUNC( NK_RECT )
 // nk_bool nk_input_is_mouse_click_down_in_rect(const struct nk_input *i, enum nk_buttons id, struct nk_rect b, nk_bool down);
 // nk_bool nk_input_any_mouse_click_in_rect(const struct nk_input*, struct nk_rect);
 // nk_bool nk_input_is_mouse_prev_hovering_rect(const struct nk_input*, struct nk_rect);
-// nk_bool nk_input_is_mouse_hovering_rect(const struct nk_input*, struct nk_rect);
+
+// nk_bool nk_input_is_mouse_hovering_rect( const struct nk_input *, struct nk_rect );
+
+
 // nk_bool nk_input_mouse_clicked(const struct nk_input*, enum nk_buttons, struct nk_rect);
 // nk_bool nk_input_is_mouse_down(const struct nk_input*, enum nk_buttons);
 // nk_bool nk_input_is_mouse_pressed(const struct nk_input*, enum nk_buttons);
