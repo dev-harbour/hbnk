@@ -97,6 +97,7 @@ static const nk_rune *hbnk_set_codepage( const char *codepage )
    static const nk_rune utf8ex_ranges[] =
    {
       0x0020, 0x007F, // ASCII
+      0x0080, 0x00FF, // Latin-1 Supplement
       0x0100, 0x017F, // Latin-Extended-A
       0x0180, 0x024F, // Latin-Extended-B
       0
@@ -218,8 +219,7 @@ HB_FUNC( NK_CLEAR )
 {
    if( hb_param( 1, HB_IT_POINTER ) != NULL )
    {
-      struct nk_context *ctx = hb_nk_context_Param( 1 );
-      nk_clear( ctx );
+      nk_clear( hb_nk_context_Param( 1 ) );
    }
    else
    {
@@ -238,8 +238,7 @@ HB_FUNC( NK_INPUT_BEGIN )
 {
    if( hb_param( 1, HB_IT_POINTER ) != NULL )
    {
-      struct nk_context *ctx = hb_nk_context_Param( 1 );
-      nk_input_begin( ctx );
+      nk_input_begin( hb_nk_context_Param( 1 ) );
    }
    else
    {
@@ -252,10 +251,7 @@ HB_FUNC( NK_INPUT_MOTION )
 {
    if( hb_param( 1, HB_IT_POINTER ) != NULL && hb_param( 2, HB_IT_NUMERIC ) != NULL && hb_param( 3, HB_IT_NUMERIC ) != NULL )
    {
-      struct nk_context *ctx = hb_nk_context_Param( 1 );
-      int x = hb_parni( 2 );
-      int y = hb_parni( 3 );
-      nk_input_motion( ctx, x, y );
+      nk_input_motion( hb_nk_context_Param( 1 ), hb_parni( 2 ), hb_parni( 3 ) );
    }
    else
    {
@@ -275,8 +271,7 @@ HB_FUNC( NK_INPUT_END )
 {
    if( hb_param( 1, HB_IT_POINTER ) != NULL )
    {
-      struct nk_context *ctx = hb_nk_context_Param( 1 );
-      nk_input_end( ctx );
+      nk_input_end( hb_nk_context_Param( 1 ) );
    }
    else
    {
@@ -298,16 +293,13 @@ HB_FUNC( NK_BEGIN )
 
    if( hb_param( 1, HB_IT_POINTER ) != NULL && hb_param( 2, HB_IT_STRING ) != NULL && ( pArray = hb_param( 3, HB_IT_ARRAY ) ) != NULL && hb_arrayLen( pArray ) == 4 && hb_param( 4, HB_IT_NUMERIC ) != NULL )
    {
-      struct nk_context *ctx = hb_nk_context_Param( 1 );
-      const char *title = hb_parc( 2 );
       struct nk_rect bounds;
       bounds.x = hb_arrayGetNI( pArray, 1 );
       bounds.y = hb_arrayGetNI( pArray, 2 );
       bounds.w = hb_arrayGetNI( pArray, 3 );
       bounds.h = hb_arrayGetNI( pArray, 4 );
-      nk_flags flags = ( nk_flags ) hb_parni( 4 );
 
-      hb_retl( nk_begin( ctx, title, bounds, flags ) );
+      hb_retl( nk_begin( hb_nk_context_Param( 1 ), hb_parc( 2 ), bounds, ( nk_flags ) hb_parni( 4 ) ) );
    }
    else
    {
@@ -322,8 +314,7 @@ HB_FUNC( NK_END )
 {
    if( hb_param( 1, HB_IT_POINTER ) != NULL )
    {
-      struct nk_context *ctx = hb_nk_context_Param( 1 );
-      nk_end( ctx );
+      nk_end( hb_nk_context_Param( 1 ) );
    }
    else
    {
@@ -354,8 +345,7 @@ HB_FUNC( NK_WINDOW_IS_HIDDEN )
 {
    if( hb_param( 1, HB_IT_POINTER ) != NULL && hb_param( 2, HB_IT_STRING ) != NULL )
    {
-      struct nk_context *ctx = hb_nk_context_Param( 1 );
-      hb_retl( nk_window_is_hidden( ctx, hb_parc( 2 ) ) );
+      hb_retl( nk_window_is_hidden( hb_nk_context_Param( 1 ), hb_parc( 2 ) ) );
    }
    else
    {
@@ -374,7 +364,6 @@ HB_FUNC( NK_WINDOW_SET_BOUNDS )
 
    if( hb_param( 1, HB_IT_POINTER ) != NULL && hb_param( 2, HB_IT_STRING ) != NULL && ( pArray = hb_param( 3, HB_IT_ARRAY ) ) != NULL && hb_arrayLen( pArray ) == 4 )
    {
-      struct nk_context *ctx = hb_nk_context_Param( 1 );
       struct nk_rect bounds;
 
       bounds.x = ( float ) hb_arrayGetND( pArray, 1 );
@@ -382,8 +371,7 @@ HB_FUNC( NK_WINDOW_SET_BOUNDS )
       bounds.w = ( float ) hb_arrayGetND( pArray, 3 );
       bounds.h = ( float ) hb_arrayGetND( pArray, 4 );
 
-      const char *name = hb_parc( 2 );
-      nk_window_set_bounds( ctx, name, bounds );
+      nk_window_set_bounds( hb_nk_context_Param( 1 ), hb_parc( 2 ), bounds );
    }
    else
    {
@@ -423,11 +411,7 @@ HB_FUNC( NK_LAYOUT_ROW_STATIC )
 {
    if( hb_param( 1, HB_IT_POINTER ) != NULL && hb_param( 2, HB_IT_NUMERIC ) != NULL && hb_param( 3, HB_IT_NUMERIC ) != NULL && hb_param( 4, HB_IT_NUMERIC ) != NULL )
    {
-      struct nk_context *ctx = hb_nk_context_Param( 1 );
-      float height = hb_parnd( 2 );
-      int item_width = hb_parni( 3 );
-      int cols = hb_parni( 4 );
-      nk_layout_row_static( ctx, height, item_width, cols );
+      nk_layout_row_static( hb_nk_context_Param( 1 ), ( float ) hb_parnd( 2 ), hb_parni( 3 ), hb_parni( 4 ) );
    }
    else
    {
