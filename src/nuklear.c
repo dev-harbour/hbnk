@@ -234,19 +234,21 @@ void hb_nk_context_Return( struct nk_context *pContext )
 }
 
 /* -------------------------------------------------------------------------
-Code Optimization
+Optimization
 ------------------------------------------------------------------------- */
-static struct nk_rect hbnk_get_to_array( PHB_ITEM pArray )
+static struct nk_rect hbnk_rect_get_array( PHB_ITEM pArray )
 {
    struct nk_rect rect;
+
    rect.x = hb_arrayGetND( pArray, 1 );
    rect.y = hb_arrayGetND( pArray, 2 );
    rect.w = hb_arrayGetND( pArray, 3 );
    rect.h = hb_arrayGetND( pArray, 4 );
+
    return rect;
 }
 
-static PHB_ITEM hbnk_set_to_array( const struct nk_rect *rect )
+static PHB_ITEM hbnk_rect_set_array( const struct nk_rect *rect )
 {
    PHB_ITEM pArray = hb_itemArrayNew( 4 );
 
@@ -258,6 +260,29 @@ static PHB_ITEM hbnk_set_to_array( const struct nk_rect *rect )
    return pArray;
 }
 
+static struct nk_colorf hbnk_colorf_get_array( PHB_ITEM pArray )
+{
+   struct nk_colorf colorf;
+
+   colorf.r = hb_arrayGetND( pArray, 1 );
+   colorf.g = hb_arrayGetND( pArray, 2 );
+   colorf.b = hb_arrayGetND( pArray, 3 );
+   colorf.a = hb_arrayGetND( pArray, 4 );
+
+   return colorf;
+}
+
+static PHB_ITEM hbnk_colorf_set_array( const struct nk_colorf *colorf )
+{
+   PHB_ITEM pArray = hb_itemArrayNew( 4 );
+
+   hb_arraySetND( pArray, 1, colorf->r );
+   hb_arraySetND( pArray, 2, colorf->g );
+   hb_arraySetND( pArray, 3, colorf->b );
+   hb_arraySetND( pArray, 4, colorf->a );
+
+   return pArray;
+}
 /* -------------------------------------------------------------------------
 Nuklear API
 ------------------------------------------------------------------------- */
@@ -346,7 +371,7 @@ HB_FUNC( NK_BEGIN )
 
    if( hb_param( 1, HB_IT_POINTER ) != NULL && hb_param( 2, HB_IT_STRING ) != NULL && ( pArray = hb_param( 3, HB_IT_ARRAY ) ) != NULL && hb_arrayLen( pArray ) == 4 && hb_param( 4, HB_IT_NUMERIC ) != NULL )
    {
-      struct nk_rect bounds = hbnk_get_to_array( pArray );
+      struct nk_rect bounds = hbnk_rect_get_array( pArray );
 
       hb_retl( nk_begin( hb_nk_context_Param( 1 ), hb_parc( 2 ), bounds, ( nk_flags ) hb_parni( 4 ) ) );
    }
@@ -413,7 +438,7 @@ HB_FUNC( NK_WINDOW_SET_BOUNDS )
 
    if( hb_param( 1, HB_IT_POINTER ) != NULL && hb_param( 2, HB_IT_STRING ) != NULL && ( pArray = hb_param( 3, HB_IT_ARRAY ) ) != NULL && hb_arrayLen( pArray ) == 4 )
    {
-      struct nk_rect bounds = hbnk_get_to_array( pArray );
+      struct nk_rect bounds = hbnk_rect_get_array( pArray );
 
       nk_window_set_bounds( hb_nk_context_Param( 1 ), hb_parc( 2 ), bounds );
    }
@@ -510,7 +535,7 @@ HB_FUNC( NK_WIDGET_BOUNDS )
    {
       struct nk_rect rect = nk_widget_bounds( hb_nk_context_Param( 1 ) );
 
-      hb_itemReturnRelease( hbnk_set_to_array( &rect ) );
+      hb_itemReturnRelease( hbnk_rect_set_array( &rect ) );
    }
    else
    {
@@ -526,7 +551,7 @@ HB_FUNC( NK_WIDGET_WIDTH )
 {
    if( hb_param( 1, HB_IT_POINTER ) != NULL )
    {
-      hb_retnd( ( float ) nk_widget_width( hb_nk_context_Param( 1 ) ) );
+      hb_retnd( nk_widget_width( hb_nk_context_Param( 1 ) ) );
    }
    else
    {
@@ -676,30 +701,20 @@ HB_FUNC( NK_COLOR_PICKER )
 {
    PHB_ITEM pArray;
 
-   if( hb_param( 1, HB_IT_POINTER ) != NULL && ( pArray = hb_param( 2, HB_IT_ARRAY ) ) != NULL && hb_param( 3, HB_IT_NUMERIC ) != NULL )
+   if( hb_param( 1, HB_IT_POINTER ) != NULL && ( pArray = hb_param( 2, HB_IT_ARRAY ) ) != NULL && hb_arrayLen( pArray ) == 4 && hb_param( 3, HB_IT_NUMERIC ) != NULL )
    {
-      struct nk_colorf colorPar;
-      colorPar.r = ( float ) hb_arrayGetND( pArray, 1 );
-      colorPar.g = ( float ) hb_arrayGetND( pArray, 2 );
-      colorPar.b = ( float ) hb_arrayGetND( pArray, 3 );
-      colorPar.a = ( float ) hb_arrayGetND( pArray, 4 );
+      struct nk_colorf colorfGet = hbnk_colorf_get_array( pArray );
 
-      struct nk_colorf colorRet = nk_color_picker( hb_nk_context_Param( 1 ), colorPar, hb_parni( 3 ) );
+      struct nk_colorf colorfSet = nk_color_picker( hb_nk_context_Param( 1 ), colorfGet, hb_parni( 3 ) );
 
-      PHB_ITEM pArrayRet = hb_itemArrayNew( 4 );
-
-      hb_arraySetND( pArrayRet, 1, ( float ) colorRet.r );
-      hb_arraySetND( pArrayRet, 2, ( float ) colorRet.g );
-      hb_arraySetND( pArrayRet, 3, ( float ) colorRet.b );
-      hb_arraySetND( pArrayRet, 4, ( float ) colorRet.a );
-
-      hb_itemReturnRelease( pArrayRet );
+      hb_itemReturnRelease( hbnk_colorf_set_array( &colorfSet ) );
    }
    else
    {
       HB_ERR_ARGS();
    }
 }
+
 // nk_bool nk_color_pick(struct nk_context*, struct nk_colorf*, enum nk_color_format);
 
 // void nk_property_int(struct nk_context*, const char *name, int min, int *val, int max, int step, float inc_per_pixel);
