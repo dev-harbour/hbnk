@@ -283,6 +283,7 @@ static PHB_ITEM hbnk_colorf_set_array( const struct nk_colorf *colorf )
 
    return pArray;
 }
+
 /* -------------------------------------------------------------------------
 Nuklear API
 ------------------------------------------------------------------------- */
@@ -533,9 +534,9 @@ HB_FUNC( NK_WIDGET_BOUNDS )
 {
    if( hb_param( 1, HB_IT_POINTER ) != NULL )
    {
-      struct nk_rect rect = nk_widget_bounds( hb_nk_context_Param( 1 ) );
+      struct nk_rect bounds = nk_widget_bounds( hb_nk_context_Param( 1 ) );
 
-      hb_itemReturnRelease( hbnk_rect_set_array( &rect ) );
+      hb_itemReturnRelease( hbnk_rect_set_array( &bounds ) );
    }
    else
    {
@@ -1110,21 +1111,12 @@ HB_FUNC( NK_VEC2 )
 // struct nk_rect nk_rect( float x, float y, float w, float h );
 HB_FUNC( NK_RECT )
 {
-   if( hb_param( 1, HB_IT_NUMERIC ) != NULL &&
-       hb_param( 2, HB_IT_NUMERIC ) != NULL &&
-       hb_param( 3, HB_IT_NUMERIC ) != NULL &&
-       hb_param( 4, HB_IT_NUMERIC ) != NULL )
+   if( hb_param( 1, HB_IT_NUMERIC ) != NULL && hb_param( 2, HB_IT_NUMERIC ) != NULL &&
+       hb_param( 3, HB_IT_NUMERIC ) != NULL && hb_param( 4, HB_IT_NUMERIC ) != NULL )
    {
-      struct nk_rect rect = nk_rect( ( float ) hb_parnd( 1 ), ( float ) hb_parnd( 2 ), ( float ) hb_parnd( 3 ), ( float ) hb_parnd( 4 ) );
+      struct nk_rect bounds = nk_rect( ( float ) hb_parnd( 1 ), ( float ) hb_parnd( 2 ), ( float ) hb_parnd( 3 ), ( float ) hb_parnd( 4 ) );
 
-      PHB_ITEM pArray = hb_itemArrayNew( 4 );
-
-      hb_arraySetND( pArray, 1, ( float ) rect.x );
-      hb_arraySetND( pArray, 2, ( float ) rect.y );
-      hb_arraySetND( pArray, 3, ( float ) rect.w );
-      hb_arraySetND( pArray, 4, ( float ) rect.h );
-
-      hb_itemReturnRelease( pArray );
+      hb_itemReturnRelease( hbnk_rect_set_array( &bounds ) );
    }
    else
    {
