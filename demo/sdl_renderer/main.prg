@@ -5,6 +5,9 @@
 #include "hbnksdl2/hbnksdl2.ch"
 #include "hbnk.ch"
 
+#define EASY 0
+#define HARD 1
+
 PROCEDURE Main()
 
    LOCAL pWin
@@ -15,6 +18,9 @@ PROCEDURE Main()
    LOCAL nWindowFlags
    LOCAL nRendererFlags
    LOCAL nFlags
+   LOCAL nOp := EASY
+   LOCAL nProperty := 20
+   LOCAL aBg := { 0.10, 0.18, 0.24, 1.0 }
 
    SDL_SetHint( SDL_HINT_VIDEO_HIGHDPI_DISABLED, "0" )
    SDL_Init( SDL_INIT_VIDEO )
@@ -64,7 +70,42 @@ PROCEDURE Main()
       ENDIF
       nk_end( pCtx )
 
-      SDL_SetRenderDrawColor( pRenderer, 26, 46, 61, 255 )
+      nFlags := NK_WINDOW_BORDER + NK_WINDOW_MOVABLE + NK_WINDOW_SCALABLE + NK_WINDOW_MINIMIZABLE + NK_WINDOW_TITLE
+      IF( nk_begin( pCtx, "Demo", nk_rect( 50, 50, 230, 250 ), nFlags ) )
+
+         nk_layout_row_static( pCtx, 30, 80, 1 )
+         IF( nk_button_label( pCtx, "button" ) )
+            OutStd( e"\nbutton pressed" )
+         ENDIF
+
+         nk_layout_row_dynamic( pCtx, 30, 2 )
+         IF( nk_option_label( pCtx, "easy", nOp == EASY ) )
+            nOp := EASY
+         ENDIF
+         IF( nk_option_label( pCtx, "hard", nOp == HARD ) )
+            nOp := HARD
+         ENDIF
+
+         nk_layout_row_dynamic( pCtx, 25, 1 )
+         nk_property_int( pCtx, "Compression:", 0, @nProperty, 100, 10, 1 )
+
+         nk_layout_row_dynamic( pCtx, 20, 1 )
+         nk_label( pCtx, "background:", NK_TEXT_LEFT )
+         nk_layout_row_dynamic( pCtx, 25, 1 )
+         IF( nk_combo_begin_color( pCtx, nk_rgb_cf( aBg ), nk_vec2( nk_widget_width( pCtx ), 400 ) ) )
+            nk_layout_row_dynamic( pCtx, 120, 1 )
+            aBg := nk_color_picker( pCtx, aBg, NK_RGBA )
+            nk_layout_row_dynamic( pCtx, 25, 1 )
+            aBg[ 1 ] := nk_propertyf( pCtx, "#R:", 0, aBg[ 1 ], 1.0, 0.01, 0.005 )
+            aBg[ 2 ] := nk_propertyf( pCtx, "#G:", 0, aBg[ 2 ], 1.0, 0.01, 0.005 )
+            aBg[ 3 ] := nk_propertyf( pCtx, "#B:", 0, aBg[ 3 ], 1.0, 0.01, 0.005 )
+            aBg[ 4 ] := nk_propertyf( pCtx, "#A:", 0, aBg[ 4 ], 1.0, 0.01, 0.005 )
+            nk_combo_end( pCtx )
+         ENDIF
+      ENDIF
+      nk_end( pCtx )
+
+      SDL_SetRenderDrawColor( pRenderer, aBg[ 1 ] * 255, aBg[ 2 ] * 255, aBg[ 3 ] * 255, aBg[ 4 ] * 255  )
       SDL_RenderClear( pRenderer )
 
       nk_sdl_render( NK_ANTI_ALIASING_ON )
