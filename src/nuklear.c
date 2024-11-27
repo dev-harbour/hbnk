@@ -234,6 +234,31 @@ void hb_nk_context_Return( struct nk_context *pContext )
 }
 
 /* -------------------------------------------------------------------------
+Code Optimization
+------------------------------------------------------------------------- */
+static struct nk_rect hbnk_get_to_array( PHB_ITEM pArray )
+{
+   struct nk_rect rect;
+   rect.x = hb_arrayGetND( pArray, 1 );
+   rect.y = hb_arrayGetND( pArray, 2 );
+   rect.w = hb_arrayGetND( pArray, 3 );
+   rect.h = hb_arrayGetND( pArray, 4 );
+   return rect;
+}
+
+static PHB_ITEM hbnk_set_to_array( const struct nk_rect *rect )
+{
+   PHB_ITEM pArray = hb_itemArrayNew( 4 );
+
+   hb_arraySetND( pArray, 1, rect->x );
+   hb_arraySetND( pArray, 2, rect->y );
+   hb_arraySetND( pArray, 3, rect->w );
+   hb_arraySetND( pArray, 4, rect->h );
+
+   return pArray;
+}
+
+/* -------------------------------------------------------------------------
 Nuklear API
 ------------------------------------------------------------------------- */
 
@@ -321,11 +346,7 @@ HB_FUNC( NK_BEGIN )
 
    if( hb_param( 1, HB_IT_POINTER ) != NULL && hb_param( 2, HB_IT_STRING ) != NULL && ( pArray = hb_param( 3, HB_IT_ARRAY ) ) != NULL && hb_arrayLen( pArray ) == 4 && hb_param( 4, HB_IT_NUMERIC ) != NULL )
    {
-      struct nk_rect bounds;
-      bounds.x = hb_arrayGetNI( pArray, 1 );
-      bounds.y = hb_arrayGetNI( pArray, 2 );
-      bounds.w = hb_arrayGetNI( pArray, 3 );
-      bounds.h = hb_arrayGetNI( pArray, 4 );
+      struct nk_rect bounds = hbnk_get_to_array( pArray );
 
       hb_retl( nk_begin( hb_nk_context_Param( 1 ), hb_parc( 2 ), bounds, ( nk_flags ) hb_parni( 4 ) ) );
    }
@@ -392,12 +413,7 @@ HB_FUNC( NK_WINDOW_SET_BOUNDS )
 
    if( hb_param( 1, HB_IT_POINTER ) != NULL && hb_param( 2, HB_IT_STRING ) != NULL && ( pArray = hb_param( 3, HB_IT_ARRAY ) ) != NULL && hb_arrayLen( pArray ) == 4 )
    {
-      struct nk_rect bounds;
-
-      bounds.x = ( float ) hb_arrayGetND( pArray, 1 );
-      bounds.y = ( float ) hb_arrayGetND( pArray, 2 );
-      bounds.w = ( float ) hb_arrayGetND( pArray, 3 );
-      bounds.h = ( float ) hb_arrayGetND( pArray, 4 );
+      struct nk_rect bounds = hbnk_get_to_array( pArray );
 
       nk_window_set_bounds( hb_nk_context_Param( 1 ), hb_parc( 2 ), bounds );
    }
@@ -494,15 +510,7 @@ HB_FUNC( NK_WIDGET_BOUNDS )
    {
       struct nk_rect rect = nk_widget_bounds( hb_nk_context_Param( 1 ) );
 
-      PHB_ITEM pArray = hb_itemArrayNew( 4 );
-
-      hb_arraySetND( pArray, 1, ( float ) rect.x );
-      hb_arraySetND( pArray, 2, ( float ) rect.y );
-      hb_arraySetND( pArray, 3, ( float ) rect.w );
-      hb_arraySetND( pArray, 4, ( float ) rect.h );
-
-      hb_itemReturnRelease( pArray );
-
+      hb_itemReturnRelease( hbnk_set_to_array( &rect ) );
    }
    else
    {
@@ -666,15 +674,15 @@ HB_FUNC( NK_OPTION_TEXT )
 // struct nk_colorf nk_color_picker(struct nk_context*, struct nk_colorf, enum nk_color_format);
 HB_FUNC( NK_COLOR_PICKER )
 {
-   PHB_ITEM pArrayPar;
+   PHB_ITEM pArray;
 
-   if( hb_param( 1, HB_IT_POINTER ) != NULL && ( pArrayPar = hb_param( 2, HB_IT_ARRAY ) ) != NULL && hb_param( 3, HB_IT_NUMERIC ) != NULL )
+   if( hb_param( 1, HB_IT_POINTER ) != NULL && ( pArray = hb_param( 2, HB_IT_ARRAY ) ) != NULL && hb_param( 3, HB_IT_NUMERIC ) != NULL )
    {
       struct nk_colorf colorPar;
-      colorPar.r = ( float ) hb_arrayGetND( pArrayPar, 1 );
-      colorPar.g = ( float ) hb_arrayGetND( pArrayPar, 2 );
-      colorPar.b = ( float ) hb_arrayGetND( pArrayPar, 3 );
-      colorPar.a = ( float ) hb_arrayGetND( pArrayPar, 4 );
+      colorPar.r = ( float ) hb_arrayGetND( pArray, 1 );
+      colorPar.g = ( float ) hb_arrayGetND( pArray, 2 );
+      colorPar.b = ( float ) hb_arrayGetND( pArray, 3 );
+      colorPar.a = ( float ) hb_arrayGetND( pArray, 4 );
 
       struct nk_colorf colorRet = nk_color_picker( hb_nk_context_Param( 1 ), colorPar, hb_parni( 3 ) );
 
@@ -968,18 +976,18 @@ HB_FUNC( NK_RGB )
 // struct nk_color nk_rgb_f(float r, float g, float b);
 // struct nk_color nk_rgb_fv(const float *rgb);
 
-// struct nk_color nk_rgb_cf(struct nk_colorf c);
+// struct nk_color nk_rgb_cf( struct nk_colorf c );
 HB_FUNC( NK_RGB_CF )
 {
-   PHB_ITEM pArrayPar;
+   PHB_ITEM pArray;
 
-   if( ( pArrayPar = hb_param( 1, HB_IT_ARRAY ) ) != NULL )
+   if( ( pArray = hb_param( 1, HB_IT_ARRAY ) ) != NULL )
    {
       struct nk_colorf colorPar;
-      colorPar.r = ( float ) hb_arrayGetND( pArrayPar, 1 );
-      colorPar.g = ( float ) hb_arrayGetND( pArrayPar, 2 );
-      colorPar.b = ( float ) hb_arrayGetND( pArrayPar, 3 );
-      colorPar.a = ( float ) hb_arrayGetND( pArrayPar, 4 );
+      colorPar.r = ( float ) hb_arrayGetND( pArray, 1 );
+      colorPar.g = ( float ) hb_arrayGetND( pArray, 2 );
+      colorPar.b = ( float ) hb_arrayGetND( pArray, 3 );
+      colorPar.a = ( float ) hb_arrayGetND( pArray, 4 );
 
       struct nk_color colorRet = nk_rgb_cf( colorPar );
 
