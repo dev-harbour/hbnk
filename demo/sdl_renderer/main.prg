@@ -8,6 +8,11 @@
 #define EASY 0
 #define HARD 1
 
+#define R 1
+#define G 2
+#define B 3
+#define A 4
+
 PROCEDURE Main()
 
    LOCAL pWin
@@ -96,16 +101,16 @@ PROCEDURE Main()
             nk_layout_row_dynamic( pCtx, 120, 1 )
             aBg := nk_color_picker( pCtx, aBg, NK_RGBA )
             nk_layout_row_dynamic( pCtx, 25, 1 )
-            aBg[ 1 ] := nk_propertyf( pCtx, "#R:", 0, aBg[ 1 ], 1.0, 0.01, 0.005 )
-            aBg[ 2 ] := nk_propertyf( pCtx, "#G:", 0, aBg[ 2 ], 1.0, 0.01, 0.005 )
-            aBg[ 3 ] := nk_propertyf( pCtx, "#B:", 0, aBg[ 3 ], 1.0, 0.01, 0.005 )
-            aBg[ 4 ] := nk_propertyf( pCtx, "#A:", 0, aBg[ 4 ], 1.0, 0.01, 0.005 )
+            aBg[ R ] := nk_propertyf( pCtx, "#R:", 0, aBg[ 1 ], 1.0, 0.01, 0.005 )
+            aBg[ G ] := nk_propertyf( pCtx, "#G:", 0, aBg[ 2 ], 1.0, 0.01, 0.005 )
+            aBg[ B ] := nk_propertyf( pCtx, "#B:", 0, aBg[ 3 ], 1.0, 0.01, 0.005 )
+            aBg[ A ] := nk_propertyf( pCtx, "#A:", 0, aBg[ 4 ], 1.0, 0.01, 0.005 )
             nk_combo_end( pCtx )
          ENDIF
       ENDIF
       nk_end( pCtx )
 
-      SDL_SetRenderDrawColor( pRenderer, aBg[ 1 ] * 255, aBg[ 2 ] * 255, aBg[ 3 ] * 255, aBg[ 4 ] * 255  )
+      SDL_SetRenderDrawColor( pRenderer, aBg[ R ] * 255, aBg[ G ] * 255, aBg[ B ] * 255, aBg[ A ] * 255  )
       SDL_RenderClear( pRenderer )
 
       nk_sdl_render( NK_ANTI_ALIASING_ON )
