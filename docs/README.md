@@ -11,7 +11,8 @@ Before installing the packages, make sure you're running the MinGW 64-bit shell.
    ```
    pacman -S mingw-w64-x86_64-gcc
    pacman -S mingw-w64-x86_64-SDL2
-   git clone https://github.com/dev-harbour/hbnk
+   pacman -S make
+   git clone https://github.com/dev-harbour/hbnk.git
    ```
 - To build the static library, execute:
 
@@ -33,7 +34,7 @@ Before installing the packages, make sure you're running the MinGW 64-bit shell.
    ```
    sudo apt update
    sudo apt install libsdl2-dev
-   git clone https://github.com/dev-harbour/hbnk
+   git clone https://github.com/dev-harbour/hbnk.git
    ```
 - To build the static library, execute:
 
