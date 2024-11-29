@@ -38,6 +38,11 @@ extern HB_EXPORT PHB_ITEM           hb_nk_context_ItemPut( PHB_ITEM pItem, struc
 extern HB_EXPORT void               hb_nk_context_ItemClear( PHB_ITEM pItem );
 extern HB_EXPORT void               hb_nk_context_StorPtr( struct nk_context *pContext, int iParam );
 extern HB_EXPORT void               hb_nk_context_Return( struct nk_context *pContext );
+
+extern HB_EXPORT struct nk_input   *hb_nk_input_Param( int iParam );
+extern HB_EXPORT PHB_ITEM           hb_nk_input_ItemPut( PHB_ITEM pItem, struct nk_input *pInput );
+extern HB_EXPORT void               hb_nk_input_StorPtr( struct nk_input *pInput, int iParam );
+extern HB_EXPORT void               hb_nk_input_Return( struct nk_input *pInput );
 HB_EXTERN_END
 
 #define HB_ERR_ARGS() ( hb_errRT_BASE_SubstR( EG_ARG, 3012, NULL, HB_ERR_FUNCNAME, HB_ERR_ARGS_BASEPARAMS ) )
