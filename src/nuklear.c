@@ -198,6 +198,46 @@ static const nk_rune *hbnk_set_codepage( const char *codepage )
    return glyph_ranges;
 }
 
+/* -------------------------------------------------------------------------
+Harbour HBNK
+------------------------------------------------------------------------- */
+// hbnk_style_window_padding_xy()
+HB_FUNC( HBNK_STYLE_WINDOW_PADDING_XY )
+{
+   if( hb_param( 1, HB_IT_POINTER ) != NULL && hb_param( 2, HB_IT_NUMERIC ) != NULL && hb_param( 3, HB_IT_NUMERIC ) != NULL )
+   {
+      struct nk_context *ctx = hb_nk_context_Param( 1 );
+
+      ctx->style.window.padding.x = hb_parnd( 2 );
+      ctx->style.window.padding.y = hb_parnd( 3 );
+   }
+   else
+   {
+      HB_ERR_ARGS();
+   }
+}
+
+// style.window.fixed_background()
+HB_FUNC( HBNK_STYLE_WINDOW_FIXED_BACKGROUND )
+{
+   PHB_ITEM pArray;
+
+   if( hb_param( 1, HB_IT_POINTER ) != NULL && ( pArray = hb_param( 2, HB_IT_ARRAY ) ) != NULL && hb_arrayLen( pArray ) == 4 )
+   {
+      struct nk_context *ctx = hb_nk_context_Param( 1 );
+
+      struct nk_color color = hbnk_color_param_array( pArray );
+
+      struct nk_style_item styleItem = nk_style_item_color( color );
+
+      ctx->style.window.fixed_background = styleItem;
+   }
+   else
+   {
+      HB_ERR_ARGS();
+   }
+}
+
 // float hbnk_input_mouse_pos_x( struct nk_context *ctx )
 HB_FUNC( HBNK_INPUT_MOUSE_POS_X )
 {
@@ -1374,7 +1414,10 @@ HB_FUNC( NK_RECT )
 // void nk_draw_list_add_image(struct nk_draw_list*, struct nk_image texture, struct nk_rect rect, struct nk_color);
 // void nk_draw_list_add_text(struct nk_draw_list*, const struct nk_user_font*, struct nk_rect, const char *text, int len, float font_height, struct nk_color);
 // void nk_draw_list_push_userdata(struct nk_draw_list*, nk_handle userdata);
-// struct nk_style_item nk_style_item_color(struct nk_color);
+// ---
+// struct nk_style_item nk_style_item_color( struct nk_color );
+// Implementation in Harbour function style_window_fixed_background
+// ---
 // struct nk_style_item nk_style_item_image(struct nk_image img);
 // struct nk_style_item nk_style_item_nine_slice(struct nk_nine_slice slice);
 // struct nk_style_item nk_style_item_hide(void);
