@@ -77,6 +77,81 @@ HB_FUNC( HBNK_LOADFONTS )
 }
 #endif
 
+/* -------------------------------------------------------------------------
+Harbour Optimization
+------------------------------------------------------------------------- */
+static struct nk_rect hbnk_rect_get_array( PHB_ITEM pArray )
+{
+   struct nk_rect rect;
+
+   rect.x = hb_arrayGetND( pArray, 1 );
+   rect.y = hb_arrayGetND( pArray, 2 );
+   rect.w = hb_arrayGetND( pArray, 3 );
+   rect.h = hb_arrayGetND( pArray, 4 );
+
+   return rect;
+}
+
+static PHB_ITEM hbnk_rect_set_array( const struct nk_rect *rect )
+{
+   PHB_ITEM pArray = hb_itemArrayNew( 4 );
+
+   hb_arraySetND( pArray, 1, rect->x );
+   hb_arraySetND( pArray, 2, rect->y );
+   hb_arraySetND( pArray, 3, rect->w );
+   hb_arraySetND( pArray, 4, rect->h );
+
+   return pArray;
+}
+// ---
+static struct nk_color hbnk_color_param_array( PHB_ITEM pArray )
+{
+   struct nk_color color;
+
+   color.r = ( unsigned char ) hb_arrayGetNI( pArray, 1 );
+   color.g = ( unsigned char ) hb_arrayGetNI( pArray, 2 );
+   color.b = ( unsigned char ) hb_arrayGetNI( pArray, 3 );
+   color.a = ( unsigned char ) hb_arrayGetNI( pArray, 4 );
+
+   return color;
+}
+
+static PHB_ITEM hbnk_color_return_array( const struct nk_color *color )
+{
+   PHB_ITEM pArray = hb_itemArrayNew( 4 );
+
+   hb_arraySetNI( pArray, 1, ( unsigned char ) color->r );
+   hb_arraySetNI( pArray, 2, ( unsigned char ) color->g );
+   hb_arraySetNI( pArray, 3, ( unsigned char ) color->b );
+   hb_arraySetNI( pArray, 4, ( unsigned char ) color->a );
+
+   return pArray;
+}
+// ---
+static struct nk_colorf hbnk_colorf_param_array( PHB_ITEM pArray )
+{
+   struct nk_colorf colorf;
+
+   colorf.r = hb_arrayGetND( pArray, 1 );
+   colorf.g = hb_arrayGetND( pArray, 2 );
+   colorf.b = hb_arrayGetND( pArray, 3 );
+   colorf.a = hb_arrayGetND( pArray, 4 );
+
+   return colorf;
+}
+
+static PHB_ITEM hbnk_colorf_return_array( const struct nk_colorf *colorf )
+{
+   PHB_ITEM pArray = hb_itemArrayNew( 4 );
+
+   hb_arraySetND( pArray, 1, colorf->r );
+   hb_arraySetND( pArray, 2, colorf->g );
+   hb_arraySetND( pArray, 3, colorf->b );
+   hb_arraySetND( pArray, 4, colorf->a );
+
+   return pArray;
+}
+// ---
 static const nk_rune *hbnk_set_codepage( const char *codepage )
 {
    if( !codepage )
@@ -123,7 +198,7 @@ static const nk_rune *hbnk_set_codepage( const char *codepage )
    return glyph_ranges;
 }
 
-//float hbnk_input_mouse_pos_x( struct nk_context *ctx )
+// float hbnk_input_mouse_pos_x( struct nk_context *ctx )
 HB_FUNC( HBNK_INPUT_MOUSE_POS_X )
 {
    if( hb_param( 1, HB_IT_POINTER ) != NULL )
@@ -137,13 +212,75 @@ HB_FUNC( HBNK_INPUT_MOUSE_POS_X )
    }
 }
 
-//float hbnk_input_mouse_pos_y( struct nk_context *ctx )
+// float hbnk_input_mouse_pos_y( struct nk_context *ctx )
 HB_FUNC( HBNK_INPUT_MOUSE_POS_Y )
 {
    if( hb_param( 1, HB_IT_POINTER ) != NULL )
    {
       struct nk_context *ctx = hb_nk_context_Param( 1 );
       hb_retnd( ( float ) ctx->input.mouse.pos.y );
+   }
+   else
+   {
+      HB_ERR_ARGS();
+   }
+}
+
+// static void hbnk_draw_text( struct nk_context *ctx, int col, int row, const char *text, struct nk_color bgColor, struct nk_color textColor )
+HB_FUNC( HBNK_DRAW_TEXT )
+{
+   PHB_ITEM pArray1;
+   PHB_ITEM pArray2;
+
+   if( hb_param( 1, HB_IT_POINTER ) != NULL && hb_param( 2, HB_IT_NUMERIC ) != NULL && hb_param( 3, HB_IT_NUMERIC ) != NULL && hb_param( 4, HB_IT_STRING ) != NULL &&
+       ( pArray1 = hb_param( 5, HB_IT_ARRAY ) ) != NULL && hb_arrayLen( pArray1 ) == 4 &&
+       ( pArray2 = hb_param( 6, HB_IT_ARRAY ) ) != NULL && hb_arrayLen( pArray2 ) == 4 )
+   {
+      struct nk_context *ctx = hb_nk_context_Param( 1 );
+      int col = hb_parni( 2 );
+      int row = hb_parni( 3 );
+      const char *text = hb_parc( 4 );
+
+      const struct nk_user_font *font = ctx->style.font;
+      const char *sampleText = "W";
+      int sampleLength = 1;
+
+      struct nk_color bgColor = hbnk_color_param_array( pArray1 );
+      struct nk_color textColor = hbnk_color_param_array( pArray2 );
+
+      if( !font )
+      {
+         printf( "Error: No font set in context.\n" );
+         return;
+      }
+
+      float fontCellWidth = font->width( font->userdata, font->height, sampleText, sampleLength );
+      float fontCellHeight = font->height;
+
+      struct nk_rect windowBounds = nk_window_get_bounds( ctx );
+
+      float paddingX = ctx->style.window.padding.x + 2;
+
+      float x = windowBounds.x + paddingX + col * fontCellWidth;
+      float y = windowBounds.y + row * fontCellHeight;
+
+      /* Pobranie wskaźnika do canvas */
+      struct nk_command_buffer *canvas = nk_window_get_canvas( ctx );
+      if( !canvas )
+      {
+         printf( "Error: No canvas available.\n" );
+         return;
+      }
+
+      /* Rysowanie tła */
+      struct nk_rect textBackground = nk_rect( x, y, strlen( text ) * fontCellWidth, fontCellHeight );
+      nk_fill_rect( canvas, textBackground, 0.0f, bgColor );
+
+      /* Przesunięcie tekstu o jeden piksel w górę */
+      struct nk_rect textRect = textBackground;
+      textRect.y -= 1;
+
+      nk_draw_text( canvas, textRect, text, strlen( text ), font, textColor, bgColor );
    }
    else
    {
@@ -231,57 +368,6 @@ void hb_nk_context_Return( struct nk_context *pContext )
    {
       hb_ret();
    }
-}
-
-/* -------------------------------------------------------------------------
-Optimization
-------------------------------------------------------------------------- */
-static struct nk_rect hbnk_rect_get_array( PHB_ITEM pArray )
-{
-   struct nk_rect rect;
-
-   rect.x = hb_arrayGetND( pArray, 1 );
-   rect.y = hb_arrayGetND( pArray, 2 );
-   rect.w = hb_arrayGetND( pArray, 3 );
-   rect.h = hb_arrayGetND( pArray, 4 );
-
-   return rect;
-}
-
-static PHB_ITEM hbnk_rect_set_array( const struct nk_rect *rect )
-{
-   PHB_ITEM pArray = hb_itemArrayNew( 4 );
-
-   hb_arraySetND( pArray, 1, rect->x );
-   hb_arraySetND( pArray, 2, rect->y );
-   hb_arraySetND( pArray, 3, rect->w );
-   hb_arraySetND( pArray, 4, rect->h );
-
-   return pArray;
-}
-
-static struct nk_colorf hbnk_colorf_get_array( PHB_ITEM pArray )
-{
-   struct nk_colorf colorf;
-
-   colorf.r = hb_arrayGetND( pArray, 1 );
-   colorf.g = hb_arrayGetND( pArray, 2 );
-   colorf.b = hb_arrayGetND( pArray, 3 );
-   colorf.a = hb_arrayGetND( pArray, 4 );
-
-   return colorf;
-}
-
-static PHB_ITEM hbnk_colorf_set_array( const struct nk_colorf *colorf )
-{
-   PHB_ITEM pArray = hb_itemArrayNew( 4 );
-
-   hb_arraySetND( pArray, 1, colorf->r );
-   hb_arraySetND( pArray, 2, colorf->g );
-   hb_arraySetND( pArray, 3, colorf->b );
-   hb_arraySetND( pArray, 4, colorf->a );
-
-   return pArray;
 }
 
 /* -------------------------------------------------------------------------
@@ -704,11 +790,11 @@ HB_FUNC( NK_COLOR_PICKER )
 
    if( hb_param( 1, HB_IT_POINTER ) != NULL && ( pArray = hb_param( 2, HB_IT_ARRAY ) ) != NULL && hb_arrayLen( pArray ) == 4 && hb_param( 3, HB_IT_NUMERIC ) != NULL )
    {
-      struct nk_colorf colorfGet = hbnk_colorf_get_array( pArray );
+      struct nk_colorf colorfPar = hbnk_colorf_param_array( pArray );
 
-      struct nk_colorf colorfSet = nk_color_picker( hb_nk_context_Param( 1 ), colorfGet, hb_parni( 3 ) );
+      struct nk_colorf colorfRet = nk_color_picker( hb_nk_context_Param( 1 ), colorfPar, hb_parni( 3 ) );
 
-      hb_itemReturnRelease( hbnk_colorf_set_array( &colorfSet ) );
+      hb_itemReturnRelease( hbnk_colorf_return_array( &colorfRet ) );
    }
    else
    {
@@ -791,11 +877,7 @@ HB_FUNC( NK_COMBO_BEGIN_COLOR )
 
    if( hb_param( 1, HB_IT_POINTER ) != NULL && ( pArray1 = hb_param( 2, HB_IT_ARRAY ) ) != NULL && ( pArray2 = hb_param( 3, HB_IT_ARRAY ) ) != NULL )
    {
-      struct nk_color color;
-      color.r = ( unsigned char ) hb_arrayGetNI( pArray1, 1 );
-      color.g = ( unsigned char ) hb_arrayGetNI( pArray1, 2 );
-      color.b = ( unsigned char ) hb_arrayGetNI( pArray1, 3 );
-      color.a = ( unsigned char ) hb_arrayGetNI( pArray1, 4 );
+      struct nk_color color = hbnk_color_param_array( pArray1 );
 
       struct nk_vec2 size;
       size.x = ( float ) hb_arrayGetND( pArray2, 1 );
@@ -967,19 +1049,11 @@ HB_FUNC( NK_MENU_END )
 // struct nk_color nk_rgb(int r, int g, int b);
 HB_FUNC( NK_RGB )
 {
-   if( hb_param( 1, HB_IT_NUMERIC ) != NULL &&
-       hb_param( 2, HB_IT_NUMERIC ) != NULL &&
-       hb_param( 3, HB_IT_NUMERIC ) != NULL )
+   if( hb_param( 1, HB_IT_NUMERIC ) != NULL && hb_param( 2, HB_IT_NUMERIC ) != NULL && hb_param( 3, HB_IT_NUMERIC ) != NULL )
    {
       struct nk_color color = nk_rgb( hb_parni( 1 ), hb_parni( 2 ), hb_parni( 3 ) );
 
-      PHB_ITEM pArray = hb_itemArrayNew( 3 );
-
-      hb_arraySetNI( pArray, 1, ( nk_byte ) color.r );
-      hb_arraySetNI( pArray, 2, ( nk_byte ) color.g );
-      hb_arraySetNI( pArray, 3, ( nk_byte ) color.b );
-
-      hb_itemReturnRelease( pArray );
+      hb_itemReturnRelease( hbnk_color_return_array( &color ) );
    }
    else
    {
@@ -1008,6 +1082,7 @@ HB_FUNC( NK_RGB_CF )
       struct nk_color colorRet = nk_rgb_cf( colorPar );
 
       PHB_ITEM pArrayRet = hb_itemArrayNew( 3 );
+
 
       hb_arraySetNI( pArrayRet, 1, ( unsigned char ) colorRet.r );
       hb_arraySetNI( pArrayRet, 2, ( unsigned char ) colorRet.g );
