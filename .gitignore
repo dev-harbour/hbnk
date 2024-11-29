@@ -1,7 +1,10 @@
 # hbnk
+
 *.bak
 *.exe
 *.hbx
+tmp.prg
+
 build
 lib
 tmp
