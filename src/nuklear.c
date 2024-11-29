@@ -201,6 +201,20 @@ static const nk_rune *hbnk_set_codepage( const char *codepage )
 /* -------------------------------------------------------------------------
 Harbour HBNK
 ------------------------------------------------------------------------- */
+// hbnk_input()
+HB_FUNC( HBNK_INPUT )
+{
+   if( hb_param( 1, HB_IT_POINTER ) != NULL )
+   {
+      struct nk_context *ctx = hb_nk_context_Param( 1 );
+      hb_nk_input_Return( &ctx->input );
+   }
+   else
+   {
+      HB_ERR_ARGS();
+   }
+}
+
 // hbnk_style_window_padding_xy()
 HB_FUNC( HBNK_STYLE_WINDOW_PADDING_XY )
 {
@@ -403,6 +417,64 @@ void hb_nk_context_Return( struct nk_context *pContext )
    if( pContext )
    {
       hb_nk_context_ItemPut( hb_param( -1, HB_IT_ANY ), pContext );
+   }
+   else
+   {
+      hb_ret();
+   }
+}
+
+/* -------------------------------------------------------------------------
+Garbage Collector Nuklear input
+------------------------------------------------------------------------- */
+static HB_GARBAGE_FUNC( hb_nk_input_Destructor )
+{
+   struct nk_input **ppInput = ( struct nk_input ** ) Cargo;
+
+   if( ppInput && *ppInput )
+   {
+      *ppInput = NULL;
+   }
+}
+
+static const HB_GC_FUNCS s_gc_nk_input_Funcs =
+{
+   hb_nk_input_Destructor,
+   hb_gcDummyMark
+};
+
+struct nk_input *hb_nk_input_Param( int iParam )
+{
+   struct nk_input **ppInput = ( struct nk_input ** ) hb_parptrGC( &s_gc_nk_input_Funcs, iParam );
+
+   if( ppInput && *ppInput )
+      return *ppInput;
+
+   HB_ERR_ARGS();
+   return NULL;
+}
+
+PHB_ITEM hb_nk_input_ItemPut( PHB_ITEM pItem, struct nk_input *pInput )
+{
+   struct nk_input **ppInput = ( struct nk_input ** ) hb_gcAllocate( sizeof( struct nk_input * ), &s_gc_nk_input_Funcs );
+
+   *ppInput = pInput;
+   return hb_itemPutPtrGC( pItem, ppInput );
+}
+
+void hb_nk_input_StorPtr( struct nk_input *pInput, int iParam )
+{
+   struct nk_input **ppInput = ( struct nk_input ** ) hb_gcAllocate( sizeof( struct nk_input * ), &s_gc_nk_input_Funcs );
+
+   *ppInput = pInput;
+   hb_storptrGC( ppInput, iParam );
+}
+
+void hb_nk_input_Return( struct nk_input *pInput )
+{
+   if( pInput )
+   {
+      hb_nk_input_ItemPut( hb_param( -1, HB_IT_ANY ), pInput );
    }
    else
    {
@@ -1384,7 +1456,23 @@ HB_FUNC( NK_RECT )
 // nk_bool nk_input_is_mouse_down(const struct nk_input*, enum nk_buttons);
 // nk_bool nk_input_is_mouse_pressed(const struct nk_input*, enum nk_buttons);
 // nk_bool nk_input_is_mouse_released(const struct nk_input*, enum nk_buttons);
-// nk_bool nk_input_is_key_pressed(const struct nk_input*, enum nk_keys);
+
+// nk_bool nk_input_is_key_pressed( const struct nk_input*, enum nk_keys );
+HB_FUNC( NK_INPUT_IS_KEY_PRESSED )
+{
+   if( hb_param( 1, HB_IT_POINTER ) != NULL && hb_param( 2, HB_IT_NUMERIC ) != NULL )
+   {
+      const struct nk_input *input = ( const struct nk_input * ) hb_nk_input_Param( 1 );
+
+      bool result = nk_input_is_key_pressed( input, hb_parni( 2 ) );
+      hb_retl( result );
+   }
+   else
+   {
+      HB_ERR_ARGS();
+   }
+}
+
 // nk_bool nk_input_is_key_released(const struct nk_input*, enum nk_keys);
 // nk_bool nk_input_is_key_down(const struct nk_input*, enum nk_keys);
 // void nk_draw_list_init(struct nk_draw_list*);
