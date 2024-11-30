@@ -16,7 +16,7 @@
 #define NK_INCLUDE_STANDARD_IO
 
 /* -------------------------------------------------------------------------
-HARBOUR IMPLEMENTATION
+ALL HARBOUR IMPLEMENTATION
 ------------------------------------------------------------------------- */
 #if defined( HBMK_HAS_SDL2 )
    #define NK_SDL_RENDERER_IMPLEMENTATION
@@ -175,6 +175,8 @@ static const nk_rune *hbnk_set_codepage( const char *codepage )
       0x0080, 0x00FF, // Latin-1 Supplement
       0x0100, 0x017F, // Latin-Extended-A
       0x0180, 0x024F, // Latin-Extended-B
+      0x2500, 0x257F, // Box Drawing
+      0x2580, 0x259F, // Block Elements
       0
    };
 
@@ -198,8 +200,67 @@ static const nk_rune *hbnk_set_codepage( const char *codepage )
    return glyph_ranges;
 }
 
+static void hbnk_Utf8CharExtract( const char *source, char *dest, size_t *index )
+{
+   unsigned char firstByte = source[ *index ];
+   size_t charLen = 1;
+
+   if( ( firstByte & 0x80 ) == 0x00 )       // ASCII (0xxxxxxx)
+      charLen = 1;
+   else if( ( firstByte & 0xE0 ) == 0xC0 )  // (110xxxxx)
+      charLen = 2;
+   else if( ( firstByte & 0xF0 ) == 0xE0 )  // (1110xxxx)
+      charLen = 3;
+   else if( ( firstByte & 0xF8 ) == 0xF0 )  // (11110xxx)
+      charLen = 4;
+
+   strncpy( dest, source + *index, charLen );
+   dest[ charLen ] = '\0';
+
+   *index += charLen;
+}
+
+static void hbnk_draw_text( struct nk_context *ctx, int col, int row, const char *text, struct nk_color bgColor, struct nk_color textColor )
+{
+   const struct nk_user_font *font = ctx->style.font;
+   const char *sampleText = "W";
+   int sampleLength = 1;
+
+   if( !font )
+   {
+      printf( "Error: No font set in context.\n" );
+      return;
+   }
+
+   float fontCellWidth = font->width( font->userdata, font->height, sampleText, sampleLength );
+   float fontCellHeight = font->height;
+
+   struct nk_rect windowBounds = nk_window_get_bounds( ctx );
+
+   float paddingX = ctx->style.window.padding.x + 2;
+
+   float x = windowBounds.x + paddingX + col * fontCellWidth;
+   /* TODO */
+   /* regarding title bar visibility */
+   float y = windowBounds.y + ( row + 2 ) * fontCellHeight;
+
+   struct nk_command_buffer *canvas = nk_window_get_canvas( ctx );
+   if( !canvas )
+   {
+      printf( "Error: No canvas available.\n" );
+      return;
+   }
+
+   struct nk_rect textBackground = nk_rect( x, y, strlen( text ) * fontCellWidth, fontCellHeight );
+   nk_fill_rect( canvas, textBackground, 0.0f, bgColor );
+
+   struct nk_rect textRect = textBackground;
+   textRect.y -= 1;
+
+   nk_draw_text( canvas, textRect, text, strlen( text ), font, bgColor, textColor );
+}
 /* -------------------------------------------------------------------------
-Harbour HBNK
+Harbour hbnk implementation
 ------------------------------------------------------------------------- */
 // hbnk_input()
 HB_FUNC( HBNK_INPUT )
@@ -334,6 +395,135 @@ HB_FUNC( HBNK_DRAW_TEXT )
       textRect.y -= 1;
 
       nk_draw_text( canvas, textRect, text, strlen( text ), font, bgColor, textColor );
+   }
+   else
+   {
+      HB_ERR_ARGS();
+   }
+}
+
+// void hbnk_Draw_Box( struct nk_context* pCtx, int x, int y, int width, int height, const char *boxString, struct nk_color, struct nk_color )
+HB_FUNC( HBNK_DRAW_BOX )
+{
+   PHB_ITEM pArray1;
+   PHB_ITEM pArray2;
+
+   if( hb_param( 1, HB_IT_POINTER ) != NULL && hb_param( 2, HB_IT_NUMERIC ) != NULL && hb_param( 3, HB_IT_NUMERIC ) != NULL
+                                            && hb_param( 4, HB_IT_NUMERIC ) != NULL && hb_param( 5, HB_IT_NUMERIC ) != NULL
+                                            && hb_param( 6, HB_IT_STRING ) != NULL
+                                            && ( pArray1 = hb_param( 7, HB_IT_ARRAY ) ) != NULL && hb_arrayLen( pArray1 ) == 4
+                                            && ( pArray2 = hb_param( 8, HB_IT_ARRAY ) ) != NULL && hb_arrayLen( pArray2 ) == 4 )
+   {
+      struct nk_context *ctx = hb_nk_context_Param( 1 );
+      int x = hb_parni( 2 );
+      int y = hb_parni( 3 );
+      int width = hb_parni( 4 );
+      int height = hb_parni( 5 );
+      const char *boxString = hb_parc( 6 );
+
+      struct nk_color bgColor = hbnk_color_param_array( pArray1 );
+      struct nk_color textColor = hbnk_color_param_array( pArray2 );
+
+      // Buffers for individual UTF-8 box-drawing characters (maximum 4 bytes + 1 for '\0')
+      char topLeft[ 5 ]     = { 0 };
+      char horizontal[ 5 ]  = { 0 };
+      char topRight[ 5 ]    = { 0 };
+      char vertical[ 5 ]    = { 0 };
+      char bottomRight[ 5 ] = { 0 };
+      char bottomLeft[ 5 ]  = { 0 };
+
+      // Extract each UTF-8 character from boxString
+      size_t index = 0;
+      hbnk_Utf8CharExtract( boxString, topLeft, &index );
+      hbnk_Utf8CharExtract( boxString, horizontal, &index );
+      hbnk_Utf8CharExtract( boxString, topRight, &index );
+      hbnk_Utf8CharExtract( boxString, vertical, &index );
+      hbnk_Utf8CharExtract( boxString, bottomRight, &index );
+      hbnk_Utf8CharExtract( boxString, bottomLeft, &index );
+
+      hbnk_draw_text( ctx, x, y, topLeft, bgColor, textColor );                  // top-left corner
+      hbnk_draw_text( ctx, x, y + height - 1, bottomLeft, bgColor, textColor );  // bottom-left corner
+
+      for( int i = 1; i < width - 1; i++ )
+      {
+         hbnk_draw_text( ctx, x + i, y, horizontal, bgColor, textColor );               // top edge
+         hbnk_draw_text( ctx, x + i, y + height - 1, horizontal, bgColor, textColor );  // bottom edge
+      }
+
+      for( int i = 1; i < height - 1; i++ )
+      {
+         hbnk_draw_text( ctx, x, y + i, vertical, bgColor, textColor );              // left edge
+         hbnk_draw_text( ctx, x + width - 1, y + i, vertical, bgColor, textColor );  // right edge
+      }
+
+      hbnk_draw_text( ctx, x + width - 1, y, topRight, bgColor, textColor );                  // top-right corner
+      hbnk_draw_text( ctx, x + width - 1, y + height - 1, bottomRight, bgColor, textColor );  // bottom-right corner
+   }
+   else
+   {
+      HB_ERR_ARGS();
+   }
+}
+
+// hbnk_maxCol( pCtx )
+HB_FUNC( HBNK_MAXCOL )
+{
+   if( hb_param( 1, HB_IT_POINTER ) != NULL )
+   {
+      struct nk_context *ctx = hb_nk_context_Param( 1 );
+      const struct nk_user_font *font = ctx->style.font;
+
+      if( font && font->width )
+      {
+         const char *sampleText = "W";
+         int sampleLength = 1;
+         float fontCellWidth = font->width( font->userdata, font->height, sampleText, sampleLength );
+
+         if( fontCellWidth > 0 ) // Uniknięcie dzielenia przez zero
+         {
+            struct nk_rect bounds = nk_window_get_bounds( ctx );
+            hb_retnd( bounds.w / fontCellWidth );
+            return;
+         }
+         else
+         {
+            hb_retnd( 0 );
+            return;
+         }
+      }
+      else
+      {
+         hb_retnd( 0 );
+         return;
+      }
+   }
+   else
+   {
+      HB_ERR_ARGS();
+   }
+}
+
+// hbnk_maxRow( pCtx )
+HB_FUNC( HBNK_MAXROW )
+{
+   if( hb_param( 1, HB_IT_POINTER ) != NULL )
+   {
+      struct nk_context *ctx = hb_nk_context_Param( 1 );
+      const struct nk_user_font *font = ctx->style.font;
+
+      if( font && font->height > 0 )
+      {
+         float fontCellHeight = font->height;
+
+         struct nk_rect bounds = nk_window_get_bounds( ctx );
+         hb_retnd( bounds.h / fontCellHeight );
+         return;
+      }
+      else
+      {
+         hb_retnd( 0 );
+         return;
+      }
    }
    else
    {
@@ -1452,7 +1642,9 @@ HB_FUNC( NK_RECT )
 // void nk_fill_polygon(struct nk_command_buffer*, float*, int point_count, struct nk_color);
 // void nk_draw_image(struct nk_command_buffer*, struct nk_rect, const struct nk_image*, struct nk_color);
 // void nk_draw_nine_slice(struct nk_command_buffer*, struct nk_rect, const struct nk_nine_slice*, struct nk_color);
-// void nk_draw_text(struct nk_command_buffer*, struct nk_rect, const char *text, int len, const struct nk_user_font*, struct nk_color, struct nk_color);
+
+// void nk_draw_text( struct nk_command_buffer*, struct nk_rect, const char *text, int len, const struct nk_user_font*, struct nk_color, struct nk_color );
+
 // void nk_push_scissor(struct nk_command_buffer*, struct nk_rect);
 // void nk_push_custom(struct nk_command_buffer*, struct nk_rect, nk_command_custom_callback, nk_handle usr);
 // nk_bool nk_input_has_mouse_click(const struct nk_input*, enum nk_buttons);
