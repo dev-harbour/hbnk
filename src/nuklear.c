@@ -80,7 +80,7 @@ HB_FUNC( HBNK_LOADFONTS )
 /* -------------------------------------------------------------------------
 Harbour Optimization
 ------------------------------------------------------------------------- */
-static struct nk_rect hbnk_rect_get_array( PHB_ITEM pArray )
+static struct nk_rect hbnk_rect_param_array( PHB_ITEM pArray )
 {
    struct nk_rect rect;
 
@@ -92,7 +92,7 @@ static struct nk_rect hbnk_rect_get_array( PHB_ITEM pArray )
    return rect;
 }
 
-static PHB_ITEM hbnk_rect_set_array( const struct nk_rect *rect )
+static PHB_ITEM hbnk_rect_return_array( const struct nk_rect *rect )
 {
    PHB_ITEM pArray = hb_itemArrayNew( 4 );
 
@@ -231,7 +231,7 @@ HB_FUNC( HBNK_STYLE_WINDOW_PADDING_XY )
    }
 }
 
-// style.window.fixed_background()
+// hbnk_style_window_fixed_background()
 HB_FUNC( HBNK_STYLE_WINDOW_FIXED_BACKGROUND )
 {
    PHB_ITEM pArray;
@@ -316,9 +316,10 @@ HB_FUNC( HBNK_DRAW_TEXT )
       float paddingX = ctx->style.window.padding.x + 2;
 
       float x = windowBounds.x + paddingX + col * fontCellWidth;
-      float y = windowBounds.y + row * fontCellHeight;
+      /* TODO */
+      /* regarding title bar visibility */
+      float y = windowBounds.y + ( row + 2 ) * fontCellHeight;
 
-      /* Pobranie wskaźnika do canvas */
       struct nk_command_buffer *canvas = nk_window_get_canvas( ctx );
       if( !canvas )
       {
@@ -326,15 +327,13 @@ HB_FUNC( HBNK_DRAW_TEXT )
          return;
       }
 
-      /* Rysowanie tła */
       struct nk_rect textBackground = nk_rect( x, y, strlen( text ) * fontCellWidth, fontCellHeight );
       nk_fill_rect( canvas, textBackground, 0.0f, bgColor );
 
-      /* Przesunięcie tekstu o jeden piksel w górę */
       struct nk_rect textRect = textBackground;
       textRect.y -= 1;
 
-      nk_draw_text( canvas, textRect, text, strlen( text ), font, textColor, bgColor );
+      nk_draw_text( canvas, textRect, text, strlen( text ), font, bgColor, textColor );
    }
    else
    {
@@ -570,7 +569,7 @@ HB_FUNC( NK_BEGIN )
 
    if( hb_param( 1, HB_IT_POINTER ) != NULL && hb_param( 2, HB_IT_STRING ) != NULL && ( pArray = hb_param( 3, HB_IT_ARRAY ) ) != NULL && hb_arrayLen( pArray ) == 4 && hb_param( 4, HB_IT_NUMERIC ) != NULL )
    {
-      struct nk_rect bounds = hbnk_rect_get_array( pArray );
+      struct nk_rect bounds = hbnk_rect_param_array( pArray );
 
       hb_retl( nk_begin( hb_nk_context_Param( 1 ), hb_parc( 2 ), bounds, ( nk_flags ) hb_parni( 4 ) ) );
    }
@@ -596,7 +595,22 @@ HB_FUNC( NK_END )
 }
 
 // struct nk_window *nk_window_find(struct nk_context *ctx, const char *name);
-// struct nk_rect nk_window_get_bounds(const struct nk_context *ctx);
+
+// struct nk_rect nk_window_get_bounds( const struct nk_context *ctx );
+HB_FUNC( NK_WINDOW_GET_BOUNDS )
+{
+   if( hb_param( 1, HB_IT_POINTER ) != NULL )
+   {
+      struct nk_rect bounds = nk_window_get_bounds( hb_nk_context_Param( 1 ) );
+
+      hb_itemReturnRelease( hbnk_rect_return_array( &bounds ) );
+   }
+   else
+   {
+      HB_ERR_ARGS();
+   }
+}
+
 // struct nk_vec2 nk_window_get_position(const struct nk_context *ctx);
 // struct nk_vec2 nk_window_get_size(const struct nk_context*);
 // float nk_window_get_width(const struct nk_context*);
@@ -637,7 +651,7 @@ HB_FUNC( NK_WINDOW_SET_BOUNDS )
 
    if( hb_param( 1, HB_IT_POINTER ) != NULL && hb_param( 2, HB_IT_STRING ) != NULL && ( pArray = hb_param( 3, HB_IT_ARRAY ) ) != NULL && hb_arrayLen( pArray ) == 4 )
    {
-      struct nk_rect bounds = hbnk_rect_get_array( pArray );
+      struct nk_rect bounds = hbnk_rect_param_array( pArray );
 
       nk_window_set_bounds( hb_nk_context_Param( 1 ), hb_parc( 2 ), bounds );
    }
@@ -734,7 +748,7 @@ HB_FUNC( NK_WIDGET_BOUNDS )
    {
       struct nk_rect bounds = nk_widget_bounds( hb_nk_context_Param( 1 ) );
 
-      hb_itemReturnRelease( hbnk_rect_set_array( &bounds ) );
+      hb_itemReturnRelease( hbnk_rect_return_array( &bounds ) );
    }
    else
    {
@@ -1303,7 +1317,7 @@ HB_FUNC( NK_RECT )
    {
       struct nk_rect bounds = nk_rect( ( float ) hb_parnd( 1 ), ( float ) hb_parnd( 2 ), ( float ) hb_parnd( 3 ), ( float ) hb_parnd( 4 ) );
 
-      hb_itemReturnRelease( hbnk_rect_set_array( &bounds ) );
+      hb_itemReturnRelease( hbnk_rect_return_array( &bounds ) );
    }
    else
    {
