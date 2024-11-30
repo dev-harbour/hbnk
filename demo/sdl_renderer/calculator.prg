@@ -36,7 +36,7 @@ PROCEDURE Main()
    pContext := nk_sdl_init( pWin, pRenderer )
 
    /* NIL select default font or provide path to font */
-   hbnk_LoadFonts( pContext, NIL, 13 )
+   hbnk_LoadFonts( pContext, NIL, 13, "CP852" )
 
    DO WHILE( !lQuit )
 
