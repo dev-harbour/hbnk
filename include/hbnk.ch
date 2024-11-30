@@ -68,7 +68,13 @@
 #define NK_KEY_SCROLL_END           27
 #define NK_KEY_SCROLL_DOWN          28
 #define NK_KEY_SCROLL_UP            29
-#define NK_KEY_MA                   30
+#define NK_KEY_MAX                  30
+
+#define NK_BUTTON_LEFT               0
+#define NK_BUTTON_MIDDLE             1
+#define NK_BUTTON_RIGHT              2
+#define NK_BUTTON_DOUBLE             3
+#define NK_BUTTON_MAX                4
 
 #endif /* End HBNK_CH_ */
 
