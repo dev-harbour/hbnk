@@ -672,6 +672,19 @@ void hb_nk_input_Return( struct nk_input *pInput )
    }
 }
 
+HB_FUNC( NK_FLAG )
+{
+   if( hb_param( 1, HB_IT_NUMERIC ) != NULL )
+   {
+      unsigned int x = ( unsigned int ) hb_parni( 1 );
+      hb_retnint( ( 1U << x ) );
+   }
+   else
+   {
+      HB_ERR_ARGS();
+   }
+}
+
 /* -------------------------------------------------------------------------
 Nuklear API
 ------------------------------------------------------------------------- */
@@ -847,9 +860,9 @@ HB_FUNC( NK_WINDOW_IS_ACTIVE )
 // nk_bool nk_window_is_any_hovered(struct nk_context*);
 HB_FUNC( NK_WINDOW_IS_ANY_HOVERED )
 {
-   if( hb_param( 1, HB_IT_POINTER ) != NULL && hb_param( 2, HB_IT_STRING ) != NULL )
+   if( hb_param( 1, HB_IT_POINTER ) != NULL )
    {
-      hb_retl( nk_window_is_any_hovered( hb_nk_context_Param( 1 ), hb_parc( 2 ) ) );
+      hb_retl( nk_window_is_any_hovered( hb_nk_context_Param( 1 ) ) );
    }
    else
    {
