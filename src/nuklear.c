@@ -259,6 +259,7 @@ static void hbnk_draw_text( struct nk_context *ctx, int col, int row, const char
 
    nk_draw_text( canvas, textRect, text, strlen( text ), font, bgColor, textColor );
 }
+
 /* -------------------------------------------------------------------------
 Harbour hbnk implementation
 ------------------------------------------------------------------------- */
@@ -830,9 +831,44 @@ HB_FUNC( NK_WINDOW_IS_HIDDEN )
    }
 }
 
-// nk_bool nk_window_is_active(struct nk_context*, const char*);
+// nk_bool nk_window_is_active( struct nk_context*, const char * );
+HB_FUNC( NK_WINDOW_IS_ACTIVE )
+{
+   if( hb_param( 1, HB_IT_POINTER ) != NULL && hb_param( 2, HB_IT_STRING ) != NULL )
+   {
+      hb_retl( nk_window_is_active( hb_nk_context_Param( 1 ), hb_parc( 2 ) ) );
+   }
+   else
+   {
+      HB_ERR_ARGS();
+   }
+}
+
 // nk_bool nk_window_is_any_hovered(struct nk_context*);
-// nk_bool nk_item_is_any_active(struct nk_context*);
+HB_FUNC( NK_WINDOW_IS_ANY_HOVERED )
+{
+   if( hb_param( 1, HB_IT_POINTER ) != NULL && hb_param( 2, HB_IT_STRING ) != NULL )
+   {
+      hb_retl( nk_window_is_any_hovered( hb_nk_context_Param( 1 ), hb_parc( 2 ) ) );
+   }
+   else
+   {
+      HB_ERR_ARGS();
+   }
+}
+
+// nk_bool nk_item_is_any_active( struct nk_context * );
+HB_FUNC( NK_ITEM_IS_ANY_ACTIVE )
+{
+   if( hb_param( 1, HB_IT_POINTER ) != NULL )
+   {
+      hb_retl( nk_item_is_any_active( hb_nk_context_Param( 1 ) ) );
+   }
+   else
+   {
+      HB_ERR_ARGS();
+   }
+}
 
 // void nk_window_set_bounds( struct nk_context *, const char *name, struct nk_rect bounds );
 HB_FUNC( NK_WINDOW_SET_BOUNDS )
