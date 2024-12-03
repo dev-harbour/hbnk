@@ -18,6 +18,7 @@ static HB_GARBAGE_FUNC( hb_sdl_window_Destructor )
    {
       SDL_DestroyWindow( *ppSDL_Window );
 
+      SDL_QuitSubSystem( SDL_INIT_VIDEO  );
       SDL_Quit();
 
       *ppSDL_Window = NULL;
@@ -227,11 +228,11 @@ SDL API
 HB_FUNC( SDL_CREATEWINDOW )
 {
    if( hb_param( 1, HB_IT_STRING ) != NULL &&
-       hb_param( 2, HB_IT_INTEGER ) != NULL &&
-       hb_param( 3, HB_IT_INTEGER ) != NULL &&
-       hb_param( 4, HB_IT_INTEGER ) != NULL &&
-       hb_param( 5, HB_IT_INTEGER ) != NULL &&
-       hb_param( 6, HB_IT_INTEGER ) != NULL )
+       hb_param( 2, HB_IT_NUMERIC ) != NULL &&
+       hb_param( 3, HB_IT_NUMERIC ) != NULL &&
+       hb_param( 4, HB_IT_NUMERIC ) != NULL &&
+       hb_param( 5, HB_IT_NUMERIC ) != NULL &&
+       hb_param( 6, HB_IT_NUMERIC ) != NULL )
    {
       hb_sdl_window_Return( SDL_CreateWindow( hb_parc( 1 ), hb_parni( 2 ), hb_parni( 3 ), hb_parni( 4 ), hb_parni( 5 ), ( Uint32 ) hb_parni( 6 ) ) );
    }
@@ -261,9 +262,33 @@ HB_FUNC( SDL_GETWINDOWSIZE )
 // int SDLCALL SDL_Init( Uint32 flags );
 HB_FUNC( SDL_INIT )
 {
-   if( hb_param( 1, HB_IT_INTEGER ) != NULL )
+   if( hb_param( 1, HB_IT_NUMERIC ) != NULL )
    {
-      hb_retni( SDL_Init( ( Uint32 ) hb_parni( 1 ) ) );
+      hb_retni( SDL_Init( ( Uint32 ) hb_parnl( 1 ) ) );
+   }
+   else
+   {
+      HB_ERR_ARGS();
+   }
+}
+
+// int SDL_WaitEvent( SDL_Event *event )
+HB_FUNC( SDL_WAITEVENT )
+{
+   if( hb_param( 1, HB_IT_BYREF ) != NULL )
+   {
+      SDL_Event *pEvent = ( SDL_Event * ) hb_xgrab( sizeof( SDL_Event ) );
+
+      if( SDL_WaitEvent( pEvent ) )
+      {
+         hb_retl( T );
+         hb_sdl_event_StorPtr( pEvent, 1 );
+      }
+      else
+      {
+         hb_xfree( pEvent );
+         hb_retl( F );
+      }
    }
    else
    {
@@ -295,14 +320,59 @@ HB_FUNC( SDL_POLLEVENT )
    }
 }
 
-// int sdl_EventType( SDL_Event *event )
-HB_FUNC( SDL_EVENTTYPE )
+// int sdl_Event_Type( SDL_Event *event )
+HB_FUNC( SDL_EVENT_TYPE )
 {
    if( hb_param( 1, HB_IT_POINTER ) != NULL )
    {
       SDL_Event *pEvent = hb_sdl_event_Param( 1 );
 
       hb_retni( pEvent->type );
+   }
+   else
+   {
+      HB_ERR_ARGS();
+   }
+}
+
+// int sdl_event_window_data1( SDL_Event *event )
+HB_FUNC( SDL_EVENT_WINDOW_DATA1 )
+{
+   if( hb_param( 1, HB_IT_POINTER ) != NULL )
+   {
+      SDL_Event *pEvent = hb_sdl_event_Param( 1 );
+
+      hb_retni( pEvent->window.data1 );
+   }
+   else
+   {
+      HB_ERR_ARGS();
+   }
+}
+
+// int sdl_event_window_data2( SDL_Event *event )
+HB_FUNC( SDL_EVENT_WINDOW_DATA2 )
+{
+   if( hb_param( 1, HB_IT_POINTER ) != NULL )
+   {
+      SDL_Event *pEvent = hb_sdl_event_Param( 1 );
+
+      hb_retni( pEvent->window.data2 );
+   }
+   else
+   {
+      HB_ERR_ARGS();
+   }
+}
+
+// int sdl_EventWindowEvent( SDL_Event *pEvent )
+HB_FUNC( SDL_EVENTWINDOWEVENT )
+{
+   if( hb_param( 1, HB_IT_POINTER ) != NULL )
+   {
+      SDL_Event *pEvent = hb_sdl_event_Param( 1 );
+
+      hb_retni( pEvent->window.event );
    }
    else
    {
