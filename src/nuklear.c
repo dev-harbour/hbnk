@@ -314,6 +314,60 @@ HB_FUNC( HBNK_STYLE_WINDOW_FIXED_BACKGROUND )
    }
 }
 
+// style_window_header_active_data_color()
+HB_FUNC( STYLE_WINDOW_HEADER_ACTIVE_DATA_COLOR )
+{
+   PHB_ITEM pArray;
+
+   if( hb_param( 1, HB_IT_POINTER ) != NULL && ( pArray = hb_param( 2, HB_IT_ARRAY ) ) != NULL && hb_arrayLen( pArray ) == 4 )
+   {
+      struct nk_context *ctx = hb_nk_context_Param( 1 );
+      struct nk_color color = hbnk_color_param_array( pArray );
+
+      ctx->style.window.header.active.data.color = color;
+   }
+   else
+   {
+      HB_ERR_ARGS();
+   }
+}
+
+// style_window_header_normal_data_color()
+HB_FUNC( STYLE_WINDOW_HEADER_NORMAL_DATA_COLOR )
+{
+   PHB_ITEM pArray;
+
+   if( hb_param( 1, HB_IT_POINTER ) != NULL && ( pArray = hb_param( 2, HB_IT_ARRAY ) ) != NULL && hb_arrayLen( pArray ) == 4 )
+   {
+      struct nk_context *ctx = hb_nk_context_Param( 1 );
+      struct nk_color color = hbnk_color_param_array( pArray );
+
+      ctx->style.window.header.normal.data.color = color;
+   }
+   else
+   {
+      HB_ERR_ARGS();
+   }
+}
+
+// style_window_header_hover_data_color
+HB_FUNC( STYLE_WINDOW_HEADER_HOVER_DATA_COLOR )
+{
+   PHB_ITEM pArray;
+   
+   if( hb_param( 1, HB_IT_POINTER ) != NULL && ( pArray = hb_param( 2, HB_IT_ARRAY ) ) != NULL && hb_arrayLen( pArray ) == 4 )
+   {
+      struct nk_context *ctx = hb_nk_context_Param( 1 );
+      struct nk_color color = hbnk_color_param_array( pArray );
+
+      ctx->style.window.header.hover.data.color = color;
+   }
+   else
+   {
+      HB_ERR_ARGS();
+   }
+}
+
 // float hbnk_input_mouse_pos_x( struct nk_context *ctx )
 HB_FUNC( HBNK_INPUT_MOUSE_POS_X )
 {
