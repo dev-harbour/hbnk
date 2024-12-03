@@ -46,7 +46,7 @@ PROCEDURE Main()
       nk_input_begin( pCtx )
       DO WHILE( SDL_PollEvent( @pEvent ) )
 
-         IF( sdl_EventType( pEvent ) == SDL_QUIT )
+         IF( sdl_Event_Type( pEvent ) == SDL_QUIT )
             lQuit := .T.
          ENDIF
 
