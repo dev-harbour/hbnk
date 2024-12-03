@@ -499,6 +499,22 @@ HB_FUNC( SDL_GETERROR )
    hb_retc( SDL_GetError() );
 }
 
+//void SDL_SetWindowMinimumSize( SDL_Window * window, int min_w, int min_h );
+HB_FUNC( SDL_SETWINDOWMINIMUMSIZE )
+{
+   if( hb_param( 1, HB_IT_POINTER ) != NULL && hb_param( 2, HB_IT_NUMERIC ) != NULL && hb_param( 3, HB_IT_NUMERIC ) != NULL )
+   {
+      SDL_Window *pWindow = hb_sdl_window_Param( 1 );
+
+      SDL_SetWindowMinimumSize( pWindow, hb_parni( 2 ), hb_parni( 3 ) );
+   }
+   else
+   {
+      HB_ERR_ARGS();
+   }
+}
+
+
 /* -------------------------------------------------------------------------
 API nuklear sdl renderer
 ------------------------------------------------------------------------- */
